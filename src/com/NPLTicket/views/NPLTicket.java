@@ -388,7 +388,7 @@ public class NPLTicket extends javax.swing.JFrame {
                 .addContainerGap(53, Short.MAX_VALUE))
         );
 
-        pnlHome.setBackground(new java.awt.Color(113, 181, 190));
+        pnlHome.setBackground(new java.awt.Color(241, 253, 255));
         pnlHome.setMaximumSize(new java.awt.Dimension(939, 630));
         pnlHome.setMinimumSize(new java.awt.Dimension(939, 630));
 
@@ -420,31 +420,38 @@ public class NPLTicket extends javax.swing.JFrame {
 
         lblHomeRightImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/NPLTicket/views/playerWithBat.png"))); // NOI18N
 
-        pnlPitch.setBackground(new java.awt.Color(245, 214, 186));
+        pnlPitch.setBackground(new java.awt.Color(254, 226, 202));
 
         pnlMidPitch.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255), 2));
         pnlMidPitch.setOpaque(false);
 
         lblWelcome1.setFont(new java.awt.Font("Comic Sans MS", 1, 18)); // NOI18N
+        lblWelcome1.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblWelcome1.setText("\"Welcome to the Seat Reservation System of NPL!\"");
 
         lblWelcome2.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome2.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome2.setText("Get ready for an unforgettable cricket experience!🏏 Secure your seat for the thrilling matches of");
 
         lblWelcome3.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome3.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome3.setText("the Nepal Premier League. Whether you're a die-hard fan or a first-time attendee, we’re here to");
 
         lblWelcome4.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome4.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome4.setText("make your journey smooth and your seat perfectly reserved.");
 
         lblWelcome5.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome5.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome5.setText("Choose your ideal spot, relax, and enjoy the excitement of NPL – where passion for cricket meets the");
 
         lblWelcome6.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome6.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome6.setText("spirit of Nepal! 🎉");
 
         lblWelcome7.setFont(new java.awt.Font("Comic Sans MS", 0, 14)); // NOI18N
+        lblWelcome7.setForeground(new java.awt.Color(51, 51, 51));
         lblWelcome7.setText("Thank you for being part of the NPL family. Let’s create unforgettable memories together!");
 
         javax.swing.GroupLayout pnlMidPitchLayout = new javax.swing.GroupLayout(pnlMidPitch);
@@ -1217,9 +1224,9 @@ public class NPLTicket extends javax.swing.JFrame {
 
         scrlPaneMatches.setViewportView(pnlMatches);
 
-        pnlDashboard.setBackground(new java.awt.Color(114, 169, 209));
+        pnlDashboard.setBackground(new java.awt.Color(199, 213, 224));
 
-        tblMatches.setBackground(new java.awt.Color(195, 230, 245));
+        tblMatches.setBackground(new java.awt.Color(230, 245, 251));
         tblMatches.setForeground(new java.awt.Color(102, 102, 102));
         tblMatches.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1260,7 +1267,7 @@ public class NPLTicket extends javax.swing.JFrame {
             tblMatches.getColumnModel().getColumn(5).setPreferredWidth(120);
         }
 
-        tblTicketDetails.setBackground(new java.awt.Color(195, 230, 245));
+        tblTicketDetails.setBackground(new java.awt.Color(230, 245, 251));
         tblTicketDetails.setForeground(new java.awt.Color(102, 102, 102));
         tblTicketDetails.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -1373,7 +1380,7 @@ public class NPLTicket extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        pnlAdmin.setBackground(new java.awt.Color(114, 169, 209));
+        pnlAdmin.setBackground(new java.awt.Color(224, 240, 251));
         pnlAdmin.setFocusable(false);
         pnlAdmin.setMaximumSize(new java.awt.Dimension(925, 630));
         pnlAdmin.setMinimumSize(new java.awt.Dimension(925, 630));
@@ -1516,30 +1523,29 @@ public class NPLTicket extends javax.swing.JFrame {
         pnlUpdateMatchStatusLayout.setHorizontalGroup(
             pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUpdateMatchStatusLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblUpdateMatchNo)
-                    .addComponent(lblUpdateStatus))
-                .addGap(18, 18, 18)
-                .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFldMatchStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
-                    .addComponent(txtUpdateMatchNo))
-                .addGap(12, 12, 12))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUpdateMatchStatusLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblUpdateMatchStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-            .addGroup(pnlUpdateMatchStatusLayout.createSequentialGroup()
                 .addGap(91, 91, 91)
                 .addComponent(btnUpdateMatchStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(118, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUpdateMatchStatusLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblUpdateMatchStatus, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlUpdateMatchStatusLayout.createSequentialGroup()
+                        .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblUpdateMatchNo)
+                            .addComponent(lblUpdateStatus))
+                        .addGap(18, 18, 18)
+                        .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtFldMatchStatus, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                            .addComponent(txtUpdateMatchNo))))
+                .addContainerGap())
         );
         pnlUpdateMatchStatusLayout.setVerticalGroup(
             pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlUpdateMatchStatusLayout.createSequentialGroup()
-                .addGap(16, 16, 16)
+                .addGap(29, 29, 29)
                 .addComponent(lblUpdateMatchStatus)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblUpdateMatchNo)
                     .addComponent(txtUpdateMatchNo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1547,7 +1553,7 @@ public class NPLTicket extends javax.swing.JFrame {
                 .addGroup(pnlUpdateMatchStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblUpdateStatus)
                     .addComponent(txtFldMatchStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(btnUpdateMatchStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -1741,22 +1747,23 @@ public class NPLTicket extends javax.swing.JFrame {
                         .addComponent(lblRemoveTicketID, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addGroup(pnlRemoveTicketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtFldRemoveTicketID, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnRemoveTicket, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(btnRemoveTicket, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtFldRemoveTicketID, javax.swing.GroupLayout.PREFERRED_SIZE, 169, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(34, 34, 34)))
                 .addContainerGap())
         );
         pnlRemoveTicketLayout.setVerticalGroup(
             pnlRemoveTicketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlRemoveTicketLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(20, 20, 20)
                 .addComponent(lblRemoveTicket)
-                .addGap(26, 26, 26)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlRemoveTicketLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblRemoveTicketID)
                     .addComponent(txtFldRemoveTicketID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(btnRemoveTicket, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                .addGap(16, 16, 16))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
+                .addComponent(btnRemoveTicket, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20))
         );
 
         javax.swing.GroupLayout pnlManageTicketDetailsLayout = new javax.swing.GroupLayout(pnlManageTicketDetails);
@@ -1773,13 +1780,10 @@ public class NPLTicket extends javax.swing.JFrame {
         pnlManageTicketDetailsLayout.setVerticalGroup(
             pnlManageTicketDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlManageTicketDetailsLayout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(pnlManageTicketDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlManageTicketDetailsLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(pnlAddTicketDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlManageTicketDetailsLayout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(pnlRemoveTicket, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(pnlAddTicketDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlRemoveTicket, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -1814,7 +1818,7 @@ public class NPLTicket extends javax.swing.JFrame {
         pnlMain.setMinimumSize(new java.awt.Dimension(1120, 630));
         pnlMain.setPreferredSize(new java.awt.Dimension(1120, 630));
 
-        pnlMainMenu.setBackground(new java.awt.Color(195, 230, 244));
+        pnlMainMenu.setBackground(new java.awt.Color(244, 249, 251));
         pnlMainMenu.setMaximumSize(new java.awt.Dimension(195, 630));
         pnlMainMenu.setMinimumSize(new java.awt.Dimension(195, 630));
         pnlMainMenu.setPreferredSize(new java.awt.Dimension(195, 630));
@@ -2004,6 +2008,7 @@ public class NPLTicket extends javax.swing.JFrame {
 
     private void btnHomeToLeagueStandingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeToLeagueStandingsActionPerformed
         // TODO add your handling code here:
+        cardLayout.show(pnlMainBody, "Dashboard");
     }//GEN-LAST:event_btnHomeToLeagueStandingsActionPerformed
 
     private void txtFldMatchTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldMatchTeamsActionPerformed
@@ -2198,6 +2203,7 @@ public class NPLTicket extends javax.swing.JFrame {
 
     private void btnHomeToMatchesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeToMatchesActionPerformed
         // TODO add your handling code here:
+        cardLayout.show(pnlMainBody, "Matches");
     }//GEN-LAST:event_btnHomeToMatchesActionPerformed
     
     private void addMatch(MatchModel match) 

@@ -270,7 +270,7 @@
     <Container class="javax.swing.JPanel" name="pnlHome">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="be" green="b5" red="71" type="rgb"/>
+          <Color blue="ff" green="fd" red="f1" type="rgb"/>
         </Property>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[939, 630]"/>
@@ -382,7 +382,7 @@
         <Container class="javax.swing.JPanel" name="pnlPitch">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="ba" green="d6" red="f5" type="rgb"/>
+              <Color blue="ca" green="e2" red="fe" type="rgb"/>
             </Property>
           </Properties>
 
@@ -476,6 +476,9 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="18" style="1"/>
                     </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
+                    </Property>
                     <Property name="horizontalAlignment" type="int" value="0"/>
                     <Property name="text" type="java.lang.String" value="&quot;Welcome to the Seat Reservation System of NPL!&quot;"/>
                   </Properties>
@@ -485,6 +488,9 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
                     </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="Get ready for an unforgettable cricket experience!\ud83c\udfcf Secure your seat for the thrilling matches of" containsInvalidXMLChars="true"/>
                   </Properties>
                 </Component>
@@ -492,6 +498,9 @@
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
+                    </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="the Nepal Premier League. Whether you&apos;re a die-hard fan or a first-time attendee, we&#x2019;re here to"/>
                   </Properties>
@@ -501,6 +510,9 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
                     </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="make your journey smooth and your seat perfectly reserved."/>
                   </Properties>
                 </Component>
@@ -508,6 +520,9 @@
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
+                    </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Choose your ideal spot, relax, and enjoy the excitement of NPL &#x2013; where passion for cricket meets the"/>
                   </Properties>
@@ -517,6 +532,9 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
                     </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
+                    </Property>
                     <Property name="text" type="java.lang.String" value="spirit of Nepal! \ud83c\udf89" containsInvalidXMLChars="true"/>
                   </Properties>
                 </Component>
@@ -524,6 +542,9 @@
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Comic Sans MS" size="14" style="0"/>
+                    </Property>
+                    <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                      <Color blue="33" green="33" red="33" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Thank you for being part of the NPL family. Let&#x2019;s create unforgettable memories together!"/>
                   </Properties>
@@ -1697,7 +1718,7 @@
     <Container class="javax.swing.JPanel" name="pnlDashboard">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="d1" green="a9" red="72" type="rgb"/>
+          <Color blue="e0" green="d5" red="c7" type="rgb"/>
         </Property>
       </Properties>
 
@@ -1760,7 +1781,7 @@
             <Component class="javax.swing.JTable" name="tblMatches">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="f5" green="e6" red="c3" type="rgb"/>
+                  <Color blue="fb" green="f5" red="e6" type="rgb"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="66" green="66" red="66" type="rgb"/>
@@ -1826,7 +1847,7 @@
             <Component class="javax.swing.JTable" name="tblTicketDetails">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                  <Color blue="f5" green="e6" red="c3" type="rgb"/>
+                  <Color blue="fb" green="f5" red="e6" type="rgb"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="66" green="66" red="66" type="rgb"/>
@@ -1951,7 +1972,7 @@
     <Container class="javax.swing.JPanel" name="pnlAdmin">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="d1" green="a9" red="72" type="rgb"/>
+          <Color blue="fb" green="f0" red="e0" type="rgb"/>
         </Property>
         <Property name="focusable" type="boolean" value="false"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -2182,36 +2203,36 @@
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="lblUpdateMatchNo" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblUpdateStatus" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="txtFldMatchStatus" pref="181" max="32767" attributes="0"/>
-                              <Component id="txtUpdateMatchNo" max="32767" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="91" max="-2" attributes="0"/>
+                          <Component id="btnUpdateMatchStatus" min="-2" pref="101" max="-2" attributes="0"/>
+                          <EmptySpace pref="118" max="32767" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="lblUpdateMatchStatus" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="lblUpdateMatchStatus" alignment="1" max="32767" attributes="0"/>
+                              <Group type="102" alignment="1" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="lblUpdateMatchNo" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblUpdateStatus" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="txtFldMatchStatus" pref="199" max="32767" attributes="0"/>
+                                      <Component id="txtUpdateMatchNo" max="32767" attributes="0"/>
+                                  </Group>
+                              </Group>
+                          </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="91" max="-2" attributes="0"/>
-                          <Component id="btnUpdateMatchStatus" min="-2" pref="101" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
                           <Component id="lblUpdateMatchStatus" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="lblUpdateMatchNo" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtUpdateMatchNo" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -2221,7 +2242,7 @@
                               <Component id="lblUpdateStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtFldMatchStatus" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="btnUpdateMatchStatus" min="-2" pref="47" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -2314,16 +2335,11 @@
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="pnlAddTicketDetails" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                              <Component id="pnlRemoveTicket" min="-2" max="-2" attributes="0"/>
-                          </Group>
+                          <Component id="pnlAddTicketDetails" min="-2" max="-2" attributes="0"/>
+                          <Component id="pnlRemoveTicket" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
                   </Group>
@@ -2563,9 +2579,10 @@
                                   <Component id="lblRemoveTicketID" pref="82" max="32767" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="txtFldRemoveTicketID" min="-2" pref="203" max="-2" attributes="0"/>
                                       <Component id="btnRemoveTicket" min="-2" pref="104" max="-2" attributes="0"/>
+                                      <Component id="txtFldRemoveTicketID" min="-2" pref="169" max="-2" attributes="0"/>
                                   </Group>
+                                  <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -2575,16 +2592,16 @@
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                           <Component id="lblRemoveTicket" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="lblRemoveTicketID" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtFldRemoveTicketID" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="btnRemoveTicket" pref="47" max="32767" attributes="0"/>
-                          <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
+                          <EmptySpace pref="52" max="32767" attributes="0"/>
+                          <Component id="btnRemoveTicket" min="-2" pref="47" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -2730,7 +2747,7 @@
         <Container class="javax.swing.JPanel" name="pnlMainMenu">
           <Properties>
             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="f4" green="e6" red="c3" type="rgb"/>
+              <Color blue="fb" green="f9" red="f4" type="rgb"/>
             </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[195, 630]"/>
