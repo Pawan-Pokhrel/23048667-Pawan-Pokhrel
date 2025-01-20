@@ -1,8 +1,16 @@
 package com.NPLTicket.views;
+import com.NPLTicket.controller.algorithms.BinarySearch;
+import com.NPLTicket.controller.algorithms.InsertionSort;
+import com.NPLTicket.controller.algorithms.MergeSort;
+import com.NPLTicket.controller.algorithms.SearchMatchCards;
+import com.NPLTicket.controller.algorithms.SelectionSort;
 import com.NPLTicket.model.MatchModel;
+import com.NPLTicket.model.TicketMatchModel;
 import com.NPLTicket.model.TicketModel;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -17,30 +25,62 @@ import javax.swing.table.DefaultTableModel;
 public class NPLTicket extends javax.swing.JFrame {
     
     private LinkedList<MatchModel> matchList;
+    private LinkedList<TicketMatchModel> ticketMatchList;
     private ArrayList<TicketModel> ticketList;
     private DefaultTableModel matchTableModel;
     private DefaultTableModel ticketTableModel;
-    private CardLayout cardLayout;
+    private DefaultTableModel ticketMatchesTableModel;
+    private CardLayout menuLayout;
+    private CardLayout bodyLayout;
     private CardLayout topLayout;
-    private String user;
+    private String user = "";
     
-    /**
-     * Creates new form NPLTicket
-     */
     public NPLTicket() {
         initComponents();
         loadComponents();
-        matchList = new LinkedList<>();  
-        ticketList = new ArrayList<>();
+        initializeLayout();
         addInitialData();
+        setIconImage(new ImageIcon(getClass().getResource("/com/NPLTicket/resources/icons/NPLImage.png")).getImage());
         setLocationRelativeTo(null);
+    }
+    
+    
+    private void initializeLayout() {
+        bodyLayout = new CardLayout();
+        pnlMainBody.setLayout(bodyLayout);
+        
+        pnlMainBody.add(pnlAdminMenu, "Admin Menu");
+        pnlMainBody.add(pnlUserMenu, "User Menu");
+        pnlMainBody.add(pnlHome, "Home");
+        pnlMainBody.add(pnlManageMatchDetails, "Add Matches");
+        pnlMainBody.add(pnlMatchesPage, "Matches");
+        pnlMainBody.add(pnlDashboard, "Dashboard");
+        pnlMainBody.add(pnlBuyTickets, "Buy Tickets");
+        pnlMainBody.add(pnlManageTickets, "Tickets");
+        pnlMainBody.add(pnlInvalidUserMessage, "Not Admin");
+        bodyLayout.show(pnlMainBody, "Home");
+
+        topLayout = new CardLayout();
+        getContentPane().setLayout(topLayout);
+        
+        getContentPane().add(pnlLogIn, "Login");
+        getContentPane().add(pnlMain, "Main");
+        
+        menuLayout = new CardLayout();
+        pnlMenu.setLayout(menuLayout);
+        
+        pnlMenu.add(pnlAdminMenu, "Admin Menu");
+        pnlMenu.add(pnlUserMenu, "User Menu");
+        
+        menuLayout.show(pnlMenu, "User Menu");
+        topLayout.show(getContentPane(), "Main");
     }
     
     private void loadComponents() 
     {
         this.pnlLogIn.setOpaque(false);
         JPanel pnlBackground = new JPanel() {
-            private final Image backgroundImage = new ImageIcon(getClass().getResource("background.png")).getImage();
+            private final Image backgroundImage = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/background.png")).getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -50,33 +90,119 @@ public class NPLTicket extends javax.swing.JFrame {
         };
         pnlBackground.add(pnlLogIn);
         setContentPane(pnlBackground);
-        cardLayout = new CardLayout();
-        pnlMainBody.setLayout(cardLayout);
+        hoverLabels();
+        
+        if(!"".equals(user)) {
+            btnHomeLogIn.setText("Log Out");
+        } else {
+            btnHomeLogIn.setText("Log In");
+        }
+        
+        pnlHomeHeader.setOpaque(false);   
+    }
+    
+    private void setActive(javax.swing.JLabel label) {
+        lblMenuHome.setBorder(null);
+        lblMenuAddMatches.setBorder(null);
+        lblMenuDashboard.setBorder(null);
+        lblMenuMatches.setBorder(null);
+        lblMenuTicket.setBorder(null);
+        lblUserMenuHome.setBorder(null);
+        lblUserMenuMatches.setBorder(null);
+        lblUserMenuTicket.setBorder(null);
+        lblMenuHome.setBackground(null);
+        lblMenuAddMatches.setBackground(null);
+        lblMenuDashboard.setBackground(null);
+        lblMenuMatches.setBackground(null);
+        lblMenuTicket.setBackground(null);
+        lblUserMenuHome.setBackground(null);
+        lblUserMenuMatches.setBackground(null);
+        lblUserMenuTicket.setBackground(null);
+        if(label != lblMenuHome && label != lblUserMenuHome) {
+            label.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE));
+            label.setBackground(new Color(59,84,108));
+        }
+    }
+    
+    private void hoverLabels() {
+        addHoverEffect(lblMenuHome);
+        addHoverEffect(lblMenuAddMatches);
+        addHoverEffect(lblMenuDashboard);
+        addHoverEffect(lblMenuMatches);
+        addHoverEffect(lblMenuTicket);
+        addHoverEffect(lblLogInToHome);
+        addHoverEffect(lblLogInToMatches);
+        addHoverEffect(lblLogInToTickets);
+        addHoverEffect(lblUserMenuHome);
+        addHoverEffect(lblUserMenuTicket);
+        addHoverEffect(lblUserMenuMatches);
+    }
+    
+    private void addHoverEffect(javax.swing.JLabel label) {
+        Color defaultColor = Color.WHITE;
+        Color hoverColor = new Color(200, 200, 200);
 
-        // Add sub-panels to pnlMainBody
-        pnlMainBody.add(pnlHome, "Home");
-        pnlMainBody.add(pnlAdmin, "Admin");
-        pnlMainBody.add(scrlPaneMatches, "Matches");
-        pnlMainBody.add(pnlDashboard, "Dashboard");
-        cardLayout.show(pnlMainBody, "Home");
+        label.setForeground(defaultColor);
 
-        // Add pnlLogIn and pnlMain to the content pane
-        getContentPane().setLayout(new CardLayout()); // Manage top-level panels
-        getContentPane().add(pnlLogIn, "Login");
-        getContentPane().add(pnlMain, "Main");
-        pnlMain.add(pnlMainMenu);
-        pnlMain.add(pnlMainBody);
+        label.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                label.setForeground(hoverColor);
+                label.setOpaque(true);
+                label.setBackground(new Color(59,84,108));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                label.setForeground(defaultColor);
+                label.setOpaque(false);
+                label.setBackground(null);
+            }
+        });
     }
     
     private void addInitialData()
-    {
-        MatchModel match1 = new MatchModel(1, "BIK vs JAB", "2024-11-30", "12:15", "JAB won", "19342");
-        MatchModel match2 = new MatchModel(2, "CHR vs KAG", "2024-12-02", "09:15", "CHR won", "6987");
-        MatchModel match3 = new MatchModel(3, "JAB vs KAY", "2024-12-02", "13:15", "JAB won", "8976");
-        MatchModel match4 = new MatchModel(4, "BIK vs SPR", "2024-12-03", "09:15", "SPR won", "7852");
-        MatchModel match5 = new MatchModel(5, "CHR vs POA", "2024-12-03", "13:15", "CHR won", "9430");
-        MatchModel match6 = new MatchModel(6, "KAG vs KAY", "2024-12-04", "09:15", "KAG won", "12043");
-        MatchModel match7 = new MatchModel(7, "BIK vs LL", "2024-12-04", "13:15", "BIK won", "11078");
+    { 
+        addMatchData();
+        addTicketData();
+        addMatchCardData();
+        addDashboardData();
+        addTicketMatchData();
+    }
+    
+    private void addMatchData() {
+        
+        matchList = new LinkedList<>(); 
+        
+        MatchModel match1 = new MatchModel(1, "Biratnagar Kings vs Janakpur Bolts", LocalDate.parse("2024-11-30"), LocalTime.parse("12:15"), "Janakpur won by 8 wickets", "19342");
+        MatchModel match2 = new MatchModel(2, "Kathmandu Gurkhas vs Chitwan Rhinos", LocalDate.parse("2024-12-02"), LocalTime.parse("09:15"), "Chitwan won by 5 wickets", "6987");
+        MatchModel match3 = new MatchModel(3, "Janakpur Bolts vs Karnali Yaks", LocalDate.parse("2024-12-02"), LocalTime.parse("13:15"), "Janakpur won by 8 wickets", "8976");
+        MatchModel match4 = new MatchModel(4, "Biratnagar Kings vs Sudur Paschim Royals", LocalDate.parse("2024-12-03"), LocalTime.parse("09:15"), "Sudur Paschim won by 90 runs", "7852");
+        MatchModel match5 = new MatchModel(5, "Chitwan Rhinos vs Pokhara Avengers", LocalDate.parse("2024-12-03"), LocalTime.parse("13:15"), "Chitwan won by 87 runs", "9430");
+        MatchModel match6 = new MatchModel(6, "Kathmandu Gurkhas vs Karnali Yaks", LocalDate.parse("2024-12-04"), LocalTime.parse("09:15"), "Kathmandu won by 3 wickets", "12043");
+        MatchModel match7 = new MatchModel(7, "Biratnagar Kings vs Lumbini Lions", LocalDate.parse("2024-12-04"), LocalTime.parse("13:15"), "Biratnagar won by 2 wickets", "11078");
+        MatchModel match8 = new MatchModel(8, "Janakpur Bolts vs Pokhara Avengers", LocalDate.parse("2024-12-05"), LocalTime.parse("09:15"), "Janakpur won by 7 wickets", "8902");
+        MatchModel match9 = new MatchModel(9, "Kathmandu Gurkhas vs Sudur Paschim Royals", LocalDate.parse("2024-12-05"), LocalTime.parse("13:15"), "Sudur Paschim won by 73 runs", "7623");
+        MatchModel match10 = new MatchModel(10, "Chitwan Rhinos vs Karnali Yaks", LocalDate.parse("2024-12-06"), LocalTime.parse("09:15"), "Karnali won by 6 wickets", "10398");
+        MatchModel match11 = new MatchModel(11, "Lumbini Lions vs Pokhara Avengers", LocalDate.parse("2024-12-06"), LocalTime.parse("13:15"), "Pokhara won by 10 wickets", "8320");
+        MatchModel match12 = new MatchModel(12, "Lumbini Lions vs Sudur Paschim Royals", LocalDate.parse("2024-12-07"), LocalTime.parse("09:15"), "Sudur Paschim won by 45 runs", "7012");
+        MatchModel match13 = new MatchModel(13, "Biratnagar Kings vs Karnali Yaks", LocalDate.parse("2024-12-07"), LocalTime.parse("13:15"), "Karnali won by 7 runs", "9500");
+        MatchModel match14 = new MatchModel(14, "Janakpur Bolts vs Lumbini Lions", LocalDate.parse("2024-12-08"), LocalTime.parse("09:15"), "Janakpur won by 1 run", "11009");
+        MatchModel match15 = new MatchModel(15, "Chitwan Rhinos vs Sudur Paschim Royals", LocalDate.parse("2024-12-08"), LocalTime.parse("13:15"), "Chitwan won by 33 runs", "9784");
+        MatchModel match16 = new MatchModel(16, "Chitwan Rhinos vs Lumbini Lions", LocalDate.parse("2024-12-09"), LocalTime.parse("09:15"), "Lumbini won by 33 runs", "8540");
+        MatchModel match17 = new MatchModel(17, "Karnali yaks vs Pokhara Avengers", LocalDate.parse("2024-12-09"), LocalTime.parse("13:15"), "Karnali won by 7 wickets", "10023");
+        MatchModel match18 = new MatchModel(18, "Janakpur Bolts vs Sudur Paschim Royals", LocalDate.parse("2024-12-10"), LocalTime.parse("09:15"), "Sudur Paschim won by 72 runs", "9310");
+        MatchModel match19 = new MatchModel(19, "Kathmandu Gurkhas vs Lumbini Lions", LocalDate.parse("2024-12-10"), LocalTime.parse("13:15"), "Kathmadu won by 18 runs", "12045");
+        MatchModel match20 = new MatchModel(20, "Biratnagar Kings vs Pokhara Avengers", LocalDate.parse("2024-12-11"), LocalTime.parse("09:15"), "Match Tied (Pokhara won the Super over)", "8492");
+        MatchModel match21 = new MatchModel(21, "Janakpur Bolts vs Kathmandu Gurkhas", LocalDate.parse("2024-12-11"), LocalTime.parse("13:15"), "Janakpur won by 5 wickets", "8931");
+        MatchModel match22 = new MatchModel(22, "Karnali Yaks vs Lumbini Lions", LocalDate.parse("2024-12-12"), LocalTime.parse("09:15"), "Karnali won by 5 runs", "10132");
+        MatchModel match23 = new MatchModel(23, "Biratnagar Kings vs Chitwan Rhinos", LocalDate.parse("2024-12-12"), LocalTime.parse("13:15"), "TBD", "0");
+        MatchModel match24 = new MatchModel(24, "Kathmandu Gurkhas vs Pokhara Avengers", LocalDate.parse("2024-12-13"), LocalTime.parse("09:15"), "TBD", "0");
+        MatchModel match25 = new MatchModel(25, "Chitwan Rhinos vs Janakpur Bolts", LocalDate.parse("2024-12-13"), LocalTime.parse("13:15"), "TBD", "0");
+        MatchModel match26 = new MatchModel(26, "Biratnagar Kings vs Kathmandu Gurkhas", LocalDate.parse("2024-12-14"), LocalTime.parse("09:15"), "TBD", "0");
+        MatchModel match27 = new MatchModel(27, "Pokhara Avengers vs Sudur Paschim Royals", LocalDate.parse("2024-12-14"), LocalTime.parse("13:15"), "TBD", "0");
+        MatchModel match28 = new MatchModel(28, "Karnali Yaks vs Sudur Paschim Royals", LocalDate.parse("2024-12-15"), LocalTime.parse("09:15"), "TBD", "0");
+
         addMatch(match1);
         addMatch(match2);
         addMatch(match3);
@@ -84,19 +210,302 @@ public class NPLTicket extends javax.swing.JFrame {
         addMatch(match5);
         addMatch(match6);
         addMatch(match7);
+        addMatch(match8);
+        addMatch(match9);
+        addMatch(match10);
+        addMatch(match11);
+        addMatch(match12);
+        addMatch(match13);
+        addMatch(match14);
+        addMatch(match15);
+        addMatch(match16);
+        addMatch(match17);
+        addMatch(match18);
+        addMatch(match19);
+        addMatch(match20);
+        addMatch(match21);
+        addMatch(match22);
+        addMatch(match23);
+        addMatch(match24);
+        addMatch(match25);
+        addMatch(match26);
+        addMatch(match27);
+        addMatch(match28);
+    }
+    
+    private void addTicketData() {
         
-        TicketModel ticket1 = new TicketModel("ZoneVIP_1", 7, "Keshav Raj Pokharel", "9840275490", "keshabpokharel054@gmail.com", "VIP", "2024-12-02");
-        TicketModel ticket2 = new TicketModel("Zone3_2", 2, "Mijal Sapkota", "9863535178", "sapmzal@gmail.com", "3", "2024-11-30");
-        TicketModel ticket3 = new TicketModel("Zone1_3", 1, "Anisha Mahato", "9845627381", "mahatoanisha2003@gmail.com", "1", "2024-11-24");
-        TicketModel ticket4 = new TicketModel("Zone3_4", 1, "Rahul Kumar Shah", "9802312788", "rkshah078@gmail.com", "3", "2024-11-27");
-        TicketModel ticket5 = new TicketModel("ZoneVIP_5", 7, "Pawan Pokhrel", "9746478675", "pawanpokhrel1111@gmail.com", "VIP", "2024-12-02");
+        ticketList = new ArrayList<>();
+        
+        TicketModel ticket1 = new TicketModel("ZoneVIP_1", 1, "Keshav Raj Pokharel", "9840275490", "keshabpokharel054@gmail.com", "VIP", LocalDate.parse("2024-11-26"), "E-sewa");
+        TicketModel ticket2 = new TicketModel("Zone3_2", 1, "Mijal Sapkota", "9863535178", "sapmzal12@gmail.com", "3", LocalDate.parse("2024-11-28"), "Khalti");
+        TicketModel ticket3 = new TicketModel("Zone1_3", 2, "Anisha Mahato", "9845627381", "mahatoanisha2003@gmail.com", "1", LocalDate.parse("2024-11-29"), "Bank Transfer");
+        TicketModel ticket4 = new TicketModel("Zone3_4", 2, "Rahul Kumar Shah", "9802312788", "rkshah078@gmail.com", "3", LocalDate.parse("2024-11-30"), "E-sewa");
+        TicketModel ticket5 = new TicketModel("ZoneVIP_5", 3, "Pawan Pokhrel", "9746478675", "pawanpokhrel1111@gmail.com", "VIP", LocalDate.parse("2024-11-29"), "IME Pay");
+        TicketModel ticket6 = new TicketModel("Zone2_6", 3, "Sita Sharma", "9812345678", "sita.sharma98@gmail.com", "2", LocalDate.parse("2024-11-28"), "E-sewa");
+        TicketModel ticket7 = new TicketModel("Zone1_7", 4, "Rajendra Yadav", "9846791234", "rajendra.yadav@gmail.com", "1", LocalDate.parse("2024-11-29"), "Bank Transfer");
+        TicketModel ticket8 = new TicketModel("ZoneVIP_8", 4, "Maya Devi", "9865987654", "maya.devi12@gmail.com", "VIP", LocalDate.parse("2024-12-01"), "Khalti");
+        TicketModel ticket9 = new TicketModel("Zone3_9", 5, "Binod Pandey", "9817654321", "binod.pandey@gmail.com", "3", LocalDate.parse("2024-12-01"), "E-sewa");
+        TicketModel ticket10 = new TicketModel("Zone2_10", 5, "Rohit Sharma", "9801234567", "rohit.sharma@gmail.com", "2", LocalDate.parse("2024-11-30"), "Bank Transfer");
+        TicketModel ticket11 = new TicketModel("Zone1_11", 6, "Nisha Thapa", "9844567890", "nisha.thapa12@gmail.com", "1", LocalDate.parse("2024-12-01"), "E-sewa");
+        TicketModel ticket12 = new TicketModel("ZoneVIP_12", 6, "Suraj Kumar", "9812345689", "suraj.kumar22@gmail.com", "VIP", LocalDate.parse("2024-12-02"), "IME Pay");
+        TicketModel ticket13 = new TicketModel("Zone3_13", 7, "Laxmi Rai", "9846781234", "laxmi.rai99@gmail.com", "3", LocalDate.parse("2024-12-01"), "Bank Transfer");
+        TicketModel ticket14 = new TicketModel("Zone2_14", 7, "Ramesh Gurung", "9809876543", "ramesh.gurung21@gmail.com", "2", LocalDate.parse("2024-12-03"), "Khalti");
+        TicketModel ticket15 = new TicketModel("Zone1_15", 8, "Bishal Kumar", "9812134578", "bishal.kumar@gmail.com", "1", LocalDate.parse("2024-12-02"), "E-sewa");
+        TicketModel ticket16 = new TicketModel("ZoneVIP_16", 8, "Manisha Joshi", "9863456789", "manisha.joshi@gmail.com", "VIP", LocalDate.parse("2024-12-03"), "Bank Transfer");
+        TicketModel ticket17 = new TicketModel("Zone3_17", 9, "Ravi Shrestha", "9849012345", "ravi.shrestha77@gmail.com", "3", LocalDate.parse("2024-12-04"), "IME Pay");
+        TicketModel ticket18 = new TicketModel("Zone2_18", 9, "Pooja Khadka", "9812346790", "pooja.khadka@gmail.com", "2", LocalDate.parse("2024-12-02"), "E-sewa");
+        TicketModel ticket19 = new TicketModel("Zone1_19", 10, "Shiva Prasad", "9845678901", "shiva.prasad12@gmail.com", "1", LocalDate.parse("2024-12-03"), "Bank Transfer");
+        TicketModel ticket20 = new TicketModel("ZoneVIP_20", 10, "Gita Rathi", "9862345678", "gita.rathi22@gmail.com", "VIP", LocalDate.parse("2024-12-05"), "Khalti");
+        TicketModel ticket21 = new TicketModel("Zone3_21", 11, "Dinesh Kumar", "9810987654", "dinesh.kumar@hotmail.com", "3", LocalDate.parse("2024-12-04"), "E-sewa");
+        TicketModel ticket22 = new TicketModel("Zone2_22", 11, "Suman Poudel", "9807654321", "suman.poudel23@gmail.com", "2", LocalDate.parse("2024-12-05"), "Bank Transfer");
+        TicketModel ticket23 = new TicketModel("ZoneVIP_23", 12, "Pradeep Rai", "9846712345", "pradeep.rai45@gmail.com", "VIP", LocalDate.parse("2024-12-06"), "IME Pay");
+        TicketModel ticket24 = new TicketModel("Zone1_24", 12, "Prashant Yadav", "9817654323", "prashant.yadav@gmail.com", "1", LocalDate.parse("2024-12-05"), "E-sewa");
+        TicketModel ticket25 = new TicketModel("Zone3_25", 13, "Sabina Thapa", "9846798987", "sabina.thapa29@gmail.com", "3", LocalDate.parse("2024-12-07"), "Bank Transfer");
+        TicketModel ticket26 = new TicketModel("Zone2_26", 13, "Dinesh Adhikari", "9812345676", "dinesh.adhikari90@gmail.com", "2", LocalDate.parse("2024-12-05"), "E-sewa");
+        TicketModel ticket27 = new TicketModel("Zone1_27", 14, "Samir Thapa", "9845674321", "samir.thapa11@gmail.com", "1", LocalDate.parse("2024-12-06"), "IME Pay");
+        TicketModel ticket28 = new TicketModel("ZoneVIP_28", 14, "Rohit Joshi", "9865687432", "rohit.joshi77@gmail.com", "VIP", LocalDate.parse("2024-12-06"), "Bank Transfer");
+        TicketModel ticket29 = new TicketModel("Zone3_29", 15, "Rina Rai", "9849012387", "rina.rai30@gmail.com", "3", LocalDate.parse("2024-12-08"), "Khalti");
+        TicketModel ticket30 = new TicketModel("Zone2_30", 15, "Ramesh Karki", "9801238765", "ramesh.karki99@gmail.com", "2", LocalDate.parse("2024-12-08"), "E-sewa");
+        TicketModel ticket31 = new TicketModel("Zone1_31", 16, "Sushant Shrestha", "9810982345", "sushant.shrestha@gmail.com", "1", LocalDate.parse("2024-12-09"), "IME Pay");
+        TicketModel ticket32 = new TicketModel("ZoneVIP_32", 16, "Manoj Kumar", "9865671234", "manoj.kumar45@gmail.com", "VIP", LocalDate.parse("2024-12-08"), "E-sewa");
+        TicketModel ticket33 = new TicketModel("Zone3_33", 17, "Sunita Shah", "9846571234", "sunita.shah44@gmail.com", "3", LocalDate.parse("2024-12-07"), "Bank Transfer");
+        TicketModel ticket34 = new TicketModel("Zone2_34", 17, "Anil Pandey", "9812145678", "anil.pandey67@gmail.com", "2", LocalDate.parse("2024-12-08"), "E-sewa");
+        TicketModel ticket35 = new TicketModel("Zone1_35", 18, "Nabin Thapa", "9845612345", "nabin.thapa87@gmail.com", "1", LocalDate.parse("2024-12-09"), "Khalti");
+        TicketModel ticket36 = new TicketModel("ZoneVIP_36", 18, "Bhanu Prasad", "9865678901", "bhanu.prasad98@gmail.com", "VIP", LocalDate.parse("2024-12-07"), "IME Pay");
+        TicketModel ticket37 = new TicketModel("Zone3_37", 19, "Pritam Kumari", "9810987654", "pritam.kumari@gmail.com", "3", LocalDate.parse("2024-12-09"), "Bank Transfer");
+        TicketModel ticket38 = new TicketModel("Zone2_38", 19, "Suman Joshi", "9801234756", "suman.joshipnp@gmail.com", "2", LocalDate.parse("2024-12-10"), "E-sewa");
+        TicketModel ticket39 = new TicketModel("Zone1_39", 20, "Raj Kumar", "9846783490", "raj.kumar24@gmail.com", "1", LocalDate.parse("2024-12-10"), "Bank Transfer");
+        TicketModel ticket40 = new TicketModel("ZoneVIP_40", 20, "Sita Kumari", "9866543210", "sita.kumari40@gmail.com", "VIP", LocalDate.parse("2024-12-11"), "Khalti");
+        TicketModel ticket41 = new TicketModel("Zone3_41", 21, "Bishal Kumar", "9810987623", "bishal.kumar@live.com", "3", LocalDate.parse("2024-12-11"), "E-sewa");
+        TicketModel ticket42 = new TicketModel("Zone2_42", 21, "Gita Sharma", "9809876543", "gita.sharma44@gmail.com", "2", LocalDate.parse("2024-12-12"), "IME Pay");
+        TicketModel ticket43 = new TicketModel("Zone1_43", 22, "Anjana Rai", "9812345789", "anjana.rai76@gmail.com", "1", LocalDate.parse("2024-12-13"), "Bank Transfer");
+        TicketModel ticket44 = new TicketModel("ZoneVIP_44", 22, "Sunil Shrestha", "9862345687", "sunil.shrestha@gmail.com", "VIP", LocalDate.parse("2024-12-13"), "E-sewa");
+        TicketModel ticket45 = new TicketModel("Zone3_45", 23, "Sanjeev Adhikari", "9810982345", "sanjeev.adhikari67@gmail.com", "3", LocalDate.parse("2024-12-14"), "Bank Transfer");
+        TicketModel ticket46 = new TicketModel("Zone2_46", 23, "Sujan Pandey", "9801234756", "sujan.pandey90@gmail.com", "2", LocalDate.parse("2024-12-15"), "IME Pay");
+        TicketModel ticket47 = new TicketModel("Zone1_47", 24, "Amit Kumar", "9846781234", "amit.kumar12@gmail.com", "1", LocalDate.parse("2024-12-14"), "E-sewa");
+        TicketModel ticket48 = new TicketModel("ZoneVIP_48", 24, "Aparna Yadav", "9863456789", "aparna.yadav12@gmail.com", "VIP", LocalDate.parse("2024-12-16"), "Khalti");
+        TicketModel ticket49 = new TicketModel("Zone3_49", 25, "Bikash Kumar", "9810987654", "bikash.kumar65@gmail.com", "3", LocalDate.parse("2024-12-16"), "Bank Transfer");
+        TicketModel ticket50 = new TicketModel("Zone2_50", 25, "Nina Thapa", "9801234789", "nina.thapa12@gmail.com", "2", LocalDate.parse("2024-12-17"), "E-sewa");
+        TicketModel ticket51 = new TicketModel("Zone1_51", 26, "Sarita Kumar", "9845789012", "sarita.kumar87@gmail.com", "1", LocalDate.parse("2024-12-18"), "IME Pay");
+        TicketModel ticket52 = new TicketModel("ZoneVIP_52", 26, "Pooja Sharma", "9864321567", "pooja.sharma@gmail.com", "VIP", LocalDate.parse("2024-12-18"), "Bank Transfer");
+        TicketModel ticket53 = new TicketModel("Zone3_53", 27, "Dinesh Yadav", "9810987654", "dinesh.yadav12@gmail.com", "3", LocalDate.parse("2024-12-19"), "E-sewa");
+        TicketModel ticket54 = new TicketModel("Zone2_54", 27, "Samjhana Thapa", "9801234567", "samjhana.thapa23@gmail.com", "2", LocalDate.parse("2024-12-19"), "IME Pay");
+        TicketModel ticket55 = new TicketModel("Zone1_55", 28, "Sujata Joshi", "9846781235", "sujata.joshi@yahoo.com", "1", LocalDate.parse("2024-12-20"), "Bank Transfer");
+        TicketModel ticket56 = new TicketModel("ZoneVIP_56", 28, "Suman Sharma", "9867654321", "suman.sharma@gmail.com", "VIP", LocalDate.parse("2024-12-20"), "E-sewa");
+
+
         addTicket(ticket1);
         addTicket(ticket2);
         addTicket(ticket3);
         addTicket(ticket4);
         addTicket(ticket5);
-        
+        addTicket(ticket6);
+        addTicket(ticket7);
+        addTicket(ticket8);
+        addTicket(ticket9);
+        addTicket(ticket10);
+        addTicket(ticket11);
+        addTicket(ticket12);
+        addTicket(ticket13);
+        addTicket(ticket14);
+        addTicket(ticket15);
+        addTicket(ticket16);
+        addTicket(ticket17);
+        addTicket(ticket18);
+        addTicket(ticket19);
+        addTicket(ticket20);
+        addTicket(ticket21);
+        addTicket(ticket22);
+        addTicket(ticket23);
+        addTicket(ticket24);
+        addTicket(ticket25);
+        addTicket(ticket26);
+        addTicket(ticket27);
+        addTicket(ticket28);
+        addTicket(ticket29);
+        addTicket(ticket30);
+        addTicket(ticket31);
+        addTicket(ticket32);
+        addTicket(ticket33);
+        addTicket(ticket34);
+        addTicket(ticket35);
+        addTicket(ticket36);
+        addTicket(ticket37);
+        addTicket(ticket38);
+        addTicket(ticket39);
+        addTicket(ticket40);
+        addTicket(ticket41);
+        addTicket(ticket42);
+        addTicket(ticket43);
+        addTicket(ticket44);
+        addTicket(ticket45);
+        addTicket(ticket46);
+        addTicket(ticket47);
+        addTicket(ticket48);
+        addTicket(ticket49);
+        addTicket(ticket50);
+        addTicket(ticket51);
+        addTicket(ticket52);
+        addTicket(ticket53);
+        addTicket(ticket54);
+        addTicket(ticket55);
+        addTicket(ticket56);
     }
+    
+    
+    
+    private void addMatchCardData() {
+        pnlMatches.removeAll();
+        pnlMatches.revalidate();
+        pnlMatches.repaint();
+        pnlMatches.setLayout(new FlowLayout());
+        Icon versusIcon = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/matches/versusIcon.png"));
+        LinkedList<MatchModel> matchesList = new LinkedList();
+        if("".equals(txtFldMatchesSearch.getText())) {
+            matchesList.addAll(matchList);
+        } else {
+            SearchMatchCards searchMatch = new SearchMatchCards();
+            matchesList.addAll(searchMatch.searchMatches(txtFldMatchesSearch.getText(), matchList));
+        }
+
+        for (int i = 0; i < matchesList.size(); i++) {
+            String teams = matchesList.get(i).getTeams();
+            int indexOfVs = teams.indexOf(" vs ");
+
+            String team1 = teams.substring(0, indexOfVs);
+            String team2 = teams.substring(indexOfVs + 4);
+            
+            Icon team1Img;
+            Icon team2Img;
+
+            try { 
+                team1Img = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/matches/" + team1.substring(0, 3) + ".png"));
+            } catch (NullPointerException e) {
+                team1Img = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/matches/tbd.png"));
+            }
+            
+            try {
+                team2Img = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/matches/" + team2.substring(0, 3) + ".png"));
+            } catch (NullPointerException e) {
+                team2Img = new ImageIcon(getClass().getResource("/com/NPLTicket/resources/matches/tbd.png"));
+            }
+
+            JPanel matchPanel = new JPanel();
+            matchPanel.setMaximumSize(new Dimension(215,200));
+            matchPanel.setMinimumSize(new Dimension(215,200));
+            matchPanel.setPreferredSize(new Dimension(215,200));
+            matchPanel.setLayout(new FlowLayout());
+
+            matchPanel.setBackground(Color.WHITE);
+
+            JLabel lblTeam1Img = new JLabel("", team1Img, JLabel.LEFT);
+            JLabel lblVs = new JLabel("", versusIcon, JLabel.CENTER);
+            JLabel lblTeam2Img = new JLabel("", team2Img, JLabel.RIGHT);
+
+            JLabel lblTeam1 = new JLabel(team1 + " vs ");
+            JLabel lblTeam2 = new JLabel(team2);
+            JLabel lblMatchDate = new JLabel("Match Date: " + matchesList.get(i).getMatchDate());
+            JLabel lblMatchTime = new JLabel("Time: " + matchesList.get(i).getMatchTime());
+            
+            JLabel txtAreaMatchStatus = new JLabel(matchesList.get(i).getMatchStatus());
+            txtAreaMatchStatus.setForeground(Color.BLUE );
+            txtAreaMatchStatus.setFocusable(false);
+
+            matchPanel.add(lblTeam1Img);
+            matchPanel.add(lblVs);
+            matchPanel.add(lblTeam2Img);
+            matchPanel.add(lblTeam1);
+            matchPanel.add(lblTeam2);
+            matchPanel.add(lblMatchDate);
+            matchPanel.add(lblMatchTime);
+            matchPanel.add(txtAreaMatchStatus);
+
+            pnlMatches.add(matchPanel);
+        }
+    }
+    
+    private void addDashboardData() {
+        int playedMatches = 0;
+        int totalTicketSales = 0;
+        for(MatchModel match: matchList) {
+            if(!"tbd".equals(match.getMatchStatus().toLowerCase())){
+                playedMatches++;
+            }
+            totalTicketSales += Integer.parseInt(match.getMatchSeats());
+        }
+        lblPlayedMatchesCount.setText(String.valueOf(playedMatches));
+        lblNextMatch.setText(matchList.get(playedMatches).getTeams());
+        lblNextMatchDate.setText("Date : " + matchList.get(playedMatches).getMatchDate() + "           Time : " + matchList.get(playedMatches).getMatchTime());
+        lblRemMatchesCount.setText(String.valueOf(matchList.size() - playedMatches));
+        lblTotalTicketSales.setText(String.valueOf(totalTicketSales));
+        lblTicketEarnings.setText("Rs. " + (totalTicketSales * 300));
+    }
+    
+    private void addTicketMatchData() {
+        ticketMatchList = new LinkedList<>();
+        ticketMatchesTableModel = (DefaultTableModel) tblTicketMatches.getModel();
+        ticketMatchesTableModel.setRowCount(0);
+        cbBuyTicketMatches.removeAllItems();
+        cbBuyTicketMatches.addItem("--Select--");
+        for (MatchModel match: matchList) {
+            TicketMatchModel ticketMatch = new TicketMatchModel(match.getMatchNo(), match.getTeams(), match.getMatchDate(), match.getMatchTime());
+            if("tbd".equals(match.getMatchStatus().toLowerCase())) {
+                ticketMatchList.add(ticketMatch);
+                ticketMatchesTableModel.addRow(new Object[] {
+                    match.getMatchNo(), match.getTeams(), match.getMatchDate(), match.getMatchTime()
+                });
+                cbBuyTicketMatches.addItem(match.getTeams());
+            }
+        }
+    }
+    
+    private void addMatchSearchData() {
+        try {
+            int searchMatch = Integer.parseInt(txtFldSearchMatch.getText().trim());
+
+            SelectionSort selectionSort = new SelectionSort();
+            selectionSort.sortByMatchNo(matchList, true);
+
+            BinarySearch search = new BinarySearch();
+            MatchModel searchedData = search.searchMatchDetails(searchMatch, matchList, 0, matchList.size() - 1);
+
+            if (searchedData == null) {
+                JOptionPane.showMessageDialog(null, "No match found for Match No: " + searchMatch, "Search Result", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            DefaultTableModel tblMatchModel = (DefaultTableModel) tblMatches.getModel();
+            tblMatchModel.setRowCount(0);
+            tblMatchModel.addRow(new Object[]{
+                searchedData.getMatchNo(),
+                searchedData.getTeams(),
+                searchedData.getMatchDate(),
+                searchedData.getMatchTime(),
+                searchedData.getMatchStatus(),
+                searchedData.getMatchSeats()
+            });
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Please enter a valid match number.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "An unexpected error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    
+    private void addTicketSearchData() {
+        String searchValue = txtFldSearchTicketOwner.getText();
+        BinarySearch search = new BinarySearch();
+        SelectionSort selectionSort = new SelectionSort();
+        selectionSort.sortByTicketOwnerName(ticketList, true);
+        TicketModel searchedData = search.searchTicketDetails(searchValue, ticketList, 0, ticketList.size() - 1);
+        ticketTableModel = (DefaultTableModel) tblTicketDetails.getModel();
+        ticketTableModel.setRowCount(0);
+        ticketTableModel.addRow(new Object[] {
+            searchedData.getTicketId(), searchedData.getMatchNo(), searchedData.getTicketOwnerName(), searchedData.getTicketOwnerPhone(), searchedData.getTicketOwnerEmail(),searchedData.getTicketZone(), searchedData.getBookingDate(), searchedData.getPaymentMethod()
+        });
+    }
+
     
 
     /**
@@ -139,40 +548,6 @@ public class NPLTicket extends javax.swing.JFrame {
         lblWelcome7 = new javax.swing.JLabel();
         pnlCrease1 = new javax.swing.JPanel();
         pnlCrease2 = new javax.swing.JPanel();
-        scrlPaneMatches = new javax.swing.JScrollPane();
-        pnlMatches = new javax.swing.JPanel();
-        pnlMatchCard1 = new javax.swing.JPanel();
-        pnlMatchCard2 = new javax.swing.JPanel();
-        pnlMatchCard4 = new javax.swing.JPanel();
-        pnlMatchCard3 = new javax.swing.JPanel();
-        pnlMatchCard5 = new javax.swing.JPanel();
-        pnlMatchCard6 = new javax.swing.JPanel();
-        pnlMatchCard7 = new javax.swing.JPanel();
-        pnlMatchCard8 = new javax.swing.JPanel();
-        pnlMatchCard9 = new javax.swing.JPanel();
-        pnlMatchCard12 = new javax.swing.JPanel();
-        pnlMatchCard11 = new javax.swing.JPanel();
-        pnlMatchCard13 = new javax.swing.JPanel();
-        pnlMatchCard14 = new javax.swing.JPanel();
-        pnlMatchCard10 = new javax.swing.JPanel();
-        pnlMatchCard16 = new javax.swing.JPanel();
-        pnlMatchCard15 = new javax.swing.JPanel();
-        pnlMatchCard17 = new javax.swing.JPanel();
-        pnlMatchCard18 = new javax.swing.JPanel();
-        pnlMatchCard19 = new javax.swing.JPanel();
-        pnlMatchCard20 = new javax.swing.JPanel();
-        pnlMatchCard21 = new javax.swing.JPanel();
-        pnlMatchCard22 = new javax.swing.JPanel();
-        pnlMatchCard23 = new javax.swing.JPanel();
-        pnlMatchCard24 = new javax.swing.JPanel();
-        pnlMatchCard25 = new javax.swing.JPanel();
-        pnlMatchCard26 = new javax.swing.JPanel();
-        pnlMatchCard27 = new javax.swing.JPanel();
-        pnlMatchCard28 = new javax.swing.JPanel();
-        pnlMatchCard29 = new javax.swing.JPanel();
-        pnlMatchCard30 = new javax.swing.JPanel();
-        pnlMatchCard31 = new javax.swing.JPanel();
-        pnlMatchCard32 = new javax.swing.JPanel();
         pnlDashboard = new javax.swing.JPanel();
         scrlPaneTableMatches = new javax.swing.JScrollPane();
         tblMatches = new javax.swing.JTable();
@@ -219,6 +594,12 @@ public class NPLTicket extends javax.swing.JFrame {
         btnRemoveTicket = new javax.swing.JButton();
         txtFldRemoveTicketID = new javax.swing.JTextField();
         lblRemoveTicketID = new javax.swing.JLabel();
+        pnlMatchesPage = new javax.swing.JPanel();
+        scrlPaneMatches = new javax.swing.JScrollPane();
+        pnlMatches = new javax.swing.JPanel();
+        lblMatchesPageHeader = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
         pnlMain = new javax.swing.JPanel();
         pnlMainMenu = new javax.swing.JPanel();
         lblMenuLogo = new javax.swing.JLabel();
@@ -592,637 +973,6 @@ public class NPLTicket extends javax.swing.JFrame {
         );
 
         pnlHomeLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {btnHomeLogIn, btnHomeToLeagueStandings, btnHomeToMatches});
-
-        scrlPaneMatches.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrlPaneMatches.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scrlPaneMatches.setMaximumSize(new java.awt.Dimension(917, 630));
-        scrlPaneMatches.setMinimumSize(new java.awt.Dimension(917, 630));
-        scrlPaneMatches.setPreferredSize(new java.awt.Dimension(917, 630));
-
-        pnlMatches.setMaximumSize(new java.awt.Dimension(917, 1830));
-        pnlMatches.setMinimumSize(new java.awt.Dimension(917, 1830));
-        pnlMatches.setPreferredSize(new java.awt.Dimension(917, 1830));
-
-        pnlMatchCard1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard1.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard1.setMinimumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard1.setPreferredSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard1Layout = new javax.swing.GroupLayout(pnlMatchCard1);
-        pnlMatchCard1.setLayout(pnlMatchCard1Layout);
-        pnlMatchCard1Layout.setHorizontalGroup(
-            pnlMatchCard1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard1Layout.setVerticalGroup(
-            pnlMatchCard1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard2.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard2.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard2.setMinimumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard2.setPreferredSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard2Layout = new javax.swing.GroupLayout(pnlMatchCard2);
-        pnlMatchCard2.setLayout(pnlMatchCard2Layout);
-        pnlMatchCard2Layout.setHorizontalGroup(
-            pnlMatchCard2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard2Layout.setVerticalGroup(
-            pnlMatchCard2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard4.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard4.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard4.setMinimumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard4.setPreferredSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard4Layout = new javax.swing.GroupLayout(pnlMatchCard4);
-        pnlMatchCard4.setLayout(pnlMatchCard4Layout);
-        pnlMatchCard4Layout.setHorizontalGroup(
-            pnlMatchCard4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard4Layout.setVerticalGroup(
-            pnlMatchCard4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard3.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard3.setMinimumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard3.setPreferredSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard3Layout = new javax.swing.GroupLayout(pnlMatchCard3);
-        pnlMatchCard3.setLayout(pnlMatchCard3Layout);
-        pnlMatchCard3Layout.setHorizontalGroup(
-            pnlMatchCard3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard3Layout.setVerticalGroup(
-            pnlMatchCard3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard5.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard5.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard5Layout = new javax.swing.GroupLayout(pnlMatchCard5);
-        pnlMatchCard5.setLayout(pnlMatchCard5Layout);
-        pnlMatchCard5Layout.setHorizontalGroup(
-            pnlMatchCard5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard5Layout.setVerticalGroup(
-            pnlMatchCard5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard6.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard6.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard6Layout = new javax.swing.GroupLayout(pnlMatchCard6);
-        pnlMatchCard6.setLayout(pnlMatchCard6Layout);
-        pnlMatchCard6Layout.setHorizontalGroup(
-            pnlMatchCard6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard6Layout.setVerticalGroup(
-            pnlMatchCard6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard7.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard7.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard7Layout = new javax.swing.GroupLayout(pnlMatchCard7);
-        pnlMatchCard7.setLayout(pnlMatchCard7Layout);
-        pnlMatchCard7Layout.setHorizontalGroup(
-            pnlMatchCard7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard7Layout.setVerticalGroup(
-            pnlMatchCard7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard8.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard8.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard8Layout = new javax.swing.GroupLayout(pnlMatchCard8);
-        pnlMatchCard8.setLayout(pnlMatchCard8Layout);
-        pnlMatchCard8Layout.setHorizontalGroup(
-            pnlMatchCard8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard8Layout.setVerticalGroup(
-            pnlMatchCard8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard9.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard9.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard9.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard9Layout = new javax.swing.GroupLayout(pnlMatchCard9);
-        pnlMatchCard9.setLayout(pnlMatchCard9Layout);
-        pnlMatchCard9Layout.setHorizontalGroup(
-            pnlMatchCard9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard9Layout.setVerticalGroup(
-            pnlMatchCard9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard12.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard12.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard12.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard12Layout = new javax.swing.GroupLayout(pnlMatchCard12);
-        pnlMatchCard12.setLayout(pnlMatchCard12Layout);
-        pnlMatchCard12Layout.setHorizontalGroup(
-            pnlMatchCard12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard12Layout.setVerticalGroup(
-            pnlMatchCard12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard11.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard11.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard11.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard11Layout = new javax.swing.GroupLayout(pnlMatchCard11);
-        pnlMatchCard11.setLayout(pnlMatchCard11Layout);
-        pnlMatchCard11Layout.setHorizontalGroup(
-            pnlMatchCard11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard11Layout.setVerticalGroup(
-            pnlMatchCard11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard13.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard13.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard13.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard13Layout = new javax.swing.GroupLayout(pnlMatchCard13);
-        pnlMatchCard13.setLayout(pnlMatchCard13Layout);
-        pnlMatchCard13Layout.setHorizontalGroup(
-            pnlMatchCard13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard13Layout.setVerticalGroup(
-            pnlMatchCard13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard14.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard14.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard14Layout = new javax.swing.GroupLayout(pnlMatchCard14);
-        pnlMatchCard14.setLayout(pnlMatchCard14Layout);
-        pnlMatchCard14Layout.setHorizontalGroup(
-            pnlMatchCard14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard14Layout.setVerticalGroup(
-            pnlMatchCard14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard10.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard10.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard10Layout = new javax.swing.GroupLayout(pnlMatchCard10);
-        pnlMatchCard10.setLayout(pnlMatchCard10Layout);
-        pnlMatchCard10Layout.setHorizontalGroup(
-            pnlMatchCard10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard10Layout.setVerticalGroup(
-            pnlMatchCard10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard16.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard16.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard16.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard16Layout = new javax.swing.GroupLayout(pnlMatchCard16);
-        pnlMatchCard16.setLayout(pnlMatchCard16Layout);
-        pnlMatchCard16Layout.setHorizontalGroup(
-            pnlMatchCard16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard16Layout.setVerticalGroup(
-            pnlMatchCard16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard15.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard15.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard15.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard15Layout = new javax.swing.GroupLayout(pnlMatchCard15);
-        pnlMatchCard15.setLayout(pnlMatchCard15Layout);
-        pnlMatchCard15Layout.setHorizontalGroup(
-            pnlMatchCard15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard15Layout.setVerticalGroup(
-            pnlMatchCard15Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard17.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard17.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard17.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard17Layout = new javax.swing.GroupLayout(pnlMatchCard17);
-        pnlMatchCard17.setLayout(pnlMatchCard17Layout);
-        pnlMatchCard17Layout.setHorizontalGroup(
-            pnlMatchCard17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard17Layout.setVerticalGroup(
-            pnlMatchCard17Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard18.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard18.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard18.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard18Layout = new javax.swing.GroupLayout(pnlMatchCard18);
-        pnlMatchCard18.setLayout(pnlMatchCard18Layout);
-        pnlMatchCard18Layout.setHorizontalGroup(
-            pnlMatchCard18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard18Layout.setVerticalGroup(
-            pnlMatchCard18Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard19.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard19.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard19.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard19Layout = new javax.swing.GroupLayout(pnlMatchCard19);
-        pnlMatchCard19.setLayout(pnlMatchCard19Layout);
-        pnlMatchCard19Layout.setHorizontalGroup(
-            pnlMatchCard19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard19Layout.setVerticalGroup(
-            pnlMatchCard19Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard20.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard20.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard20.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard20Layout = new javax.swing.GroupLayout(pnlMatchCard20);
-        pnlMatchCard20.setLayout(pnlMatchCard20Layout);
-        pnlMatchCard20Layout.setHorizontalGroup(
-            pnlMatchCard20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard20Layout.setVerticalGroup(
-            pnlMatchCard20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard21.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard21.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard21.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard21Layout = new javax.swing.GroupLayout(pnlMatchCard21);
-        pnlMatchCard21.setLayout(pnlMatchCard21Layout);
-        pnlMatchCard21Layout.setHorizontalGroup(
-            pnlMatchCard21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard21Layout.setVerticalGroup(
-            pnlMatchCard21Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard22.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard22.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard22.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard22Layout = new javax.swing.GroupLayout(pnlMatchCard22);
-        pnlMatchCard22.setLayout(pnlMatchCard22Layout);
-        pnlMatchCard22Layout.setHorizontalGroup(
-            pnlMatchCard22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard22Layout.setVerticalGroup(
-            pnlMatchCard22Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard23.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard23.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard23.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard23Layout = new javax.swing.GroupLayout(pnlMatchCard23);
-        pnlMatchCard23.setLayout(pnlMatchCard23Layout);
-        pnlMatchCard23Layout.setHorizontalGroup(
-            pnlMatchCard23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard23Layout.setVerticalGroup(
-            pnlMatchCard23Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard24.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard24.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard24.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard24Layout = new javax.swing.GroupLayout(pnlMatchCard24);
-        pnlMatchCard24.setLayout(pnlMatchCard24Layout);
-        pnlMatchCard24Layout.setHorizontalGroup(
-            pnlMatchCard24Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard24Layout.setVerticalGroup(
-            pnlMatchCard24Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard25.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard25.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard25.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard25Layout = new javax.swing.GroupLayout(pnlMatchCard25);
-        pnlMatchCard25.setLayout(pnlMatchCard25Layout);
-        pnlMatchCard25Layout.setHorizontalGroup(
-            pnlMatchCard25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard25Layout.setVerticalGroup(
-            pnlMatchCard25Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard26.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard26.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard26.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard26Layout = new javax.swing.GroupLayout(pnlMatchCard26);
-        pnlMatchCard26.setLayout(pnlMatchCard26Layout);
-        pnlMatchCard26Layout.setHorizontalGroup(
-            pnlMatchCard26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard26Layout.setVerticalGroup(
-            pnlMatchCard26Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard27.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard27.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard27.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard27Layout = new javax.swing.GroupLayout(pnlMatchCard27);
-        pnlMatchCard27.setLayout(pnlMatchCard27Layout);
-        pnlMatchCard27Layout.setHorizontalGroup(
-            pnlMatchCard27Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard27Layout.setVerticalGroup(
-            pnlMatchCard27Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard28.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard28.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard28.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard28Layout = new javax.swing.GroupLayout(pnlMatchCard28);
-        pnlMatchCard28.setLayout(pnlMatchCard28Layout);
-        pnlMatchCard28Layout.setHorizontalGroup(
-            pnlMatchCard28Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard28Layout.setVerticalGroup(
-            pnlMatchCard28Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard29.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard29.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard29.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard29Layout = new javax.swing.GroupLayout(pnlMatchCard29);
-        pnlMatchCard29.setLayout(pnlMatchCard29Layout);
-        pnlMatchCard29Layout.setHorizontalGroup(
-            pnlMatchCard29Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard29Layout.setVerticalGroup(
-            pnlMatchCard29Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard30.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard30.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard30.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard30Layout = new javax.swing.GroupLayout(pnlMatchCard30);
-        pnlMatchCard30.setLayout(pnlMatchCard30Layout);
-        pnlMatchCard30Layout.setHorizontalGroup(
-            pnlMatchCard30Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard30Layout.setVerticalGroup(
-            pnlMatchCard30Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard31.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard31.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard31.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard31Layout = new javax.swing.GroupLayout(pnlMatchCard31);
-        pnlMatchCard31.setLayout(pnlMatchCard31Layout);
-        pnlMatchCard31Layout.setHorizontalGroup(
-            pnlMatchCard31Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard31Layout.setVerticalGroup(
-            pnlMatchCard31Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        pnlMatchCard32.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
-        pnlMatchCard32.setMaximumSize(new java.awt.Dimension(200, 200));
-        pnlMatchCard32.setMinimumSize(new java.awt.Dimension(200, 200));
-
-        javax.swing.GroupLayout pnlMatchCard32Layout = new javax.swing.GroupLayout(pnlMatchCard32);
-        pnlMatchCard32.setLayout(pnlMatchCard32Layout);
-        pnlMatchCard32Layout.setHorizontalGroup(
-            pnlMatchCard32Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-        pnlMatchCard32Layout.setVerticalGroup(
-            pnlMatchCard32Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 198, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout pnlMatchesLayout = new javax.swing.GroupLayout(pnlMatches);
-        pnlMatches.setLayout(pnlMatchesLayout);
-        pnlMatchesLayout.setHorizontalGroup(
-            pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                .addGap(31, 31, 31)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlMatchesLayout.createSequentialGroup()
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pnlMatchCard25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlMatchCard29, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard26, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard27, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard28, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard30, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard31, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(12, 12, 12)
-                                .addComponent(pnlMatchCard32, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(pnlMatchesLayout.createSequentialGroup()
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(pnlMatchCard21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlMatchCard17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard23, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard24, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(pnlMatchesLayout.createSequentialGroup()
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(pnlMatchCard13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlMatchCard9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(pnlMatchesLayout.createSequentialGroup()
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(pnlMatchCard5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(pnlMatchCard1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(pnlMatchesLayout.createSequentialGroup()
-                                .addComponent(pnlMatchCard6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(pnlMatchCard7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlMatchCard8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(44, Short.MAX_VALUE))
-        );
-        pnlMatchesLayout.setVerticalGroup(
-            pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMatchesLayout.createSequentialGroup()
-                .addContainerGap(99, Short.MAX_VALUE)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard14, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard15, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard19, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard17, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard20, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard22, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard23, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard24, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard26, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard27, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard28, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlMatchCard29, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard31, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard32, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlMatchCard30, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(23, 23, 23))
-        );
-
-        scrlPaneMatches.setViewportView(pnlMatches);
 
         pnlDashboard.setBackground(new java.awt.Color(199, 213, 224));
 
@@ -1808,6 +1558,84 @@ public class NPLTicket extends javax.swing.JFrame {
                 .addGap(21, 21, 21))
         );
 
+        scrlPaneMatches.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrlPaneMatches.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        scrlPaneMatches.setMaximumSize(new java.awt.Dimension(917, 630));
+        scrlPaneMatches.setMinimumSize(new java.awt.Dimension(917, 630));
+        scrlPaneMatches.setPreferredSize(new java.awt.Dimension(917, 630));
+
+        pnlMatches.setMaximumSize(new java.awt.Dimension(917, 1830));
+        pnlMatches.setMinimumSize(new java.awt.Dimension(917, 1830));
+        pnlMatches.setPreferredSize(new java.awt.Dimension(917, 1830));
+
+        javax.swing.GroupLayout pnlMatchesLayout = new javax.swing.GroupLayout(pnlMatches);
+        pnlMatches.setLayout(pnlMatchesLayout);
+        pnlMatchesLayout.setHorizontalGroup(
+            pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 917, Short.MAX_VALUE)
+        );
+        pnlMatchesLayout.setVerticalGroup(
+            pnlMatchesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1830, Short.MAX_VALUE)
+        );
+
+        scrlPaneMatches.setViewportView(pnlMatches);
+
+        lblMatchesPageHeader.setText("Matches");
+
+        jLabel1.setText("jLabel1");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addContainerGap(210, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addComponent(jLabel1)
+                .addContainerGap(16, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout pnlMatchesPageLayout = new javax.swing.GroupLayout(pnlMatchesPage);
+        pnlMatchesPage.setLayout(pnlMatchesPageLayout);
+        pnlMatchesPageLayout.setHorizontalGroup(
+            pnlMatchesPageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlMatchesPageLayout.createSequentialGroup()
+                .addGroup(pnlMatchesPageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlMatchesPageLayout.createSequentialGroup()
+                        .addGap(397, 397, 397)
+                        .addComponent(lblMatchesPageHeader))
+                    .addGroup(pnlMatchesPageLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(488, Short.MAX_VALUE))
+            .addGroup(pnlMatchesPageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMatchesPageLayout.createSequentialGroup()
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(scrlPaneMatches, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        pnlMatchesPageLayout.setVerticalGroup(
+            pnlMatchesPageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlMatchesPageLayout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(lblMatchesPageHeader)
+                .addGap(18, 18, 18)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(534, Short.MAX_VALUE))
+            .addGroup(pnlMatchesPageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlMatchesPageLayout.createSequentialGroup()
+                    .addContainerGap(122, Short.MAX_VALUE)
+                    .addComponent(scrlPaneMatches, javax.swing.GroupLayout.PREFERRED_SIZE, 502, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("NPL Seat Reservation");
         setMaximumSize(new java.awt.Dimension(1120, 630));
@@ -1978,38 +1806,77 @@ public class NPLTicket extends javax.swing.JFrame {
         try {
             String userName = txtFldLogInUsername.getText();
             char[] password = pswFldLogInPassword.getPassword();
-            if(!"".equals(userName) && password != null) {
-                if("admin".equals(userName.toLowerCase())) {
-                    if(Arrays.equals(password, "admin@123".toCharArray())) {
-                            topLayout = (CardLayout) getContentPane().getLayout();
-                            topLayout.show(getContentPane(), "Main");
-                            cardLayout.show(pnlMainBody, "Home");
-                            pswFldLogInPassword.setText("");
-                            return;
-                    } else {
-                        JOptionPane.showMessageDialog(pnlMain, "Invalid Password!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(pnlMain, "Invalid Username!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(pnlMain, "Empty Fields Detected!", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+
+            if ("".equals(userName) || password == null || password.length == 0) {
+                JOptionPane.showMessageDialog(pnlMain, "Username or Password cannot be empty!", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                return;
             }
-            
+
+            if (null == userName.toLowerCase()) {
+                JOptionPane.showMessageDialog(pnlMain, "Invalid Username!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+            } else switch (userName.toLowerCase()) {
+                case "admin" -> {
+                    if (Arrays.equals(password, "admin@123".toCharArray())) {
+                        logInSuccess("Admin", "Admin Menu");
+                    } else {
+                        JOptionPane.showMessageDialog(pnlMain, "Invalid Password for Admin!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                case "pawan" -> {
+                    if (Arrays.equals(password, "23048667".toCharArray())) {
+                        logInSuccess("Pawan", "User Menu");
+                    } else {
+                        JOptionPane.showMessageDialog(pnlMain, "Invalid Password for Pawan!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                default -> JOptionPane.showMessageDialog(pnlMain, "Invalid Username!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e, "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
         }
     }//GEN-LAST:event_btnLogInActionPerformed
 
+    private void logInSuccess(String userName, String menuType) {
+        topLayout = (CardLayout) getContentPane().getLayout();
+        topLayout.show(getContentPane(), "Main");
+        bodyLayout.show(pnlMainBody, "Home");
+
+        user = userName;
+        emptyTextFields();
+
+        if ("admin".equals(user.toLowerCase())) {
+            btnHomeLogIn.setText("Log Out");
+            lblMenuAdmin.setText(user);
+        } else {
+            btnUserMenuLogIn.setText("Log Out");
+            lblMenuUser.setText(user);
+        }
+
+        menuLayout.show(pnlMenu, menuType);
+    }
+    
     private void btnHomeLogInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeLogInActionPerformed
         // TODO add your handling code here:
+        if("Log Out".equals(btnHomeLogIn.getText()) || "Log Out".equals(btnUserMenuLogIn.getText())) {
+            this.user = "";
+        }
+        
+        if("admin".equals(user.toLowerCase())) {
+            menuLayout.show(pnlMenu, "Admin Menu");
+            btnHomeLogIn.setText("Log out");
+            lblMenuAdmin.setText(this.user);
+        } else if(!"".equals(user) ) {
+            menuLayout.show(pnlMenu, "User Menu");
+            btnUserMenuLogIn.setText("Log Out");
+            lblMenuUser.setText(this.user);
+        } else {
+            btnHomeLogIn.setText("Log In");
+            lblMenuAdmin.setText("User");
+        }
         topLayout.show(getContentPane(), "Login");
+        emptyTextFields();
+        addTicketMatchData();
     }//GEN-LAST:event_btnHomeLogInActionPerformed
-
-    private void btnHomeToLeagueStandingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeToLeagueStandingsActionPerformed
-        // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Dashboard");
-    }//GEN-LAST:event_btnHomeToLeagueStandingsActionPerformed
 
     private void txtFldMatchTeamsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldMatchTeamsActionPerformed
         // TODO add your handling code here:
@@ -2026,77 +1893,74 @@ public class NPLTicket extends javax.swing.JFrame {
     private void btnAddMatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddMatchActionPerformed
         // TODO add your handling code here:
         
-        try {
-            if (txtFldMatchTeams.getText() != "" && txtFldMatchDate.getText() != "" && txtFldMatchTime.getText() != "") {
-                if (LocalDate.parse(txtFldMatchDate.getText()) instanceof LocalDate) {
-                    if(LocalTime.parse(txtFldMatchTime.getText()) instanceof LocalTime) {
-                        int matchNo = matchList.isEmpty() ? 1 : matchList.get(matchList.size() - 1).getMatchNo() + 1;
-                        MatchModel matchDetails = new MatchModel(matchNo, txtFldMatchTeams.getText(), txtFldMatchDate.getText(), txtFldMatchTime.getText(), "TBD", "filling");
-                        addMatch(matchDetails);
-                        JOptionPane.showMessageDialog(pnlMain,"(" +  matchNo + "," + txtFldMatchTeams.getText() + "," + txtFldMatchDate.getText() + "," + txtFldMatchTime.getText() + "," + "TBD,filling)", "Match Added !!", JOptionPane.INFORMATION_MESSAGE);
-                        txtFldMatchTeams.setText("");
-                        txtFldMatchDate.setText("");
-                        txtFldMatchTime.setText("");
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(pnlMain, "Invalid Date.Format (yyyy-mm-dd)", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
-                }
-            } else {
-                JOptionPane.showMessageDialog(pnlMain, "Empty Fields Detected", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
-            }
-        } catch(Exception e){
-            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e, "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+        if (isInputMatchValid()) {
+            int matchNo = matchList.isEmpty() ? 1 : matchList.get(matchList.size() - 1).getMatchNo() + 1;
+            String matchStatus = "".equals(txtFldMatchStatus.getText()) ? "TBD" : txtFldMatchStatus.getText();
+            MatchModel matchDetails = new MatchModel(matchNo, txtFldMatchTeams.getText(), LocalDate.parse(txtFldMatchDate.getText()), LocalTime.parse(txtFldMatchTime.getText()), matchStatus, "0");
+            addMatch(matchDetails);
+            addMatchCardData();
+            addTicketMatchData();
+            JOptionPane.showMessageDialog(pnlMain,"Match No: " +  matchNo + ", " + txtFldMatchTeams.getText() + ", has been successfully added to the table!!", "Match Added !!", JOptionPane.INFORMATION_MESSAGE);
+            emptyTextFields();
+            addDashboardData();
         }
     }//GEN-LAST:event_btnAddMatchActionPerformed
 
-    private void txtUpdateMatchNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUpdateMatchNoActionPerformed
+    private void txtFldMatchNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldMatchNoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtUpdateMatchNoActionPerformed
+    }//GEN-LAST:event_txtFldMatchNoActionPerformed
 
-    private void btnUpdateMatchStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateMatchStatusActionPerformed
+    private void btnUpdateMatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateMatchActionPerformed
         // TODO add your handling code here:
-        try {
-            if(!"".equals(txtUpdateMatchNo.getText()) && !"".equals(txtFldMatchStatus.getText())) {
-                int matchNo = Integer.parseInt(txtUpdateMatchNo.getText());
-                String matchStatus = txtFldMatchStatus.getText();
-                if(matchNo > 0 && matchNo <= 32) {
-
-                    for(MatchModel match: matchList) {
-                        if (match.getMatchNo() == matchNo) {
-                            match.setMatchStatus(matchStatus);
-                            loadDataToMatchTable();
-                            JOptionPane.showMessageDialog(pnlMain, "Status Updated to: " + matchStatus , "Status Updated!!", JOptionPane.INFORMATION_MESSAGE);
-                            txtUpdateMatchNo.setText("");
-                            txtFldMatchStatus.setText("");
-                            return;
-                        }
+        if(isInputMatchValid()) { 
+            if(Integer.parseInt(txtFldMatchNo.getText()) <= 32 && Integer.parseInt(txtFldMatchNo.getText()) > 0) {
+                for(MatchModel match: matchList) {
+                    int matchNo = Integer.parseInt(txtFldMatchNo.getText());
+                    String teams = txtFldMatchTeams.getText();
+                    LocalDate matchDate = LocalDate.parse(txtFldMatchDate.getText()); 
+                    LocalTime matchTime = LocalTime.parse(txtFldMatchTime.getText());
+                    String matchStatus = txtFldMatchStatus.getText();
+                    if (match.getMatchNo() == matchNo) {
+                        match.setTeams(teams);
+                        match.setMatchDate(matchDate);
+                        match.setMatchTime(matchTime);
+                        match.setMatchStatus(matchStatus);
+                        loadDataToMatchTable();
+                        loadDataToTicketMatchTable();
+                        JOptionPane.showMessageDialog(pnlMain,"Match Details Updated for Match No: " + matchNo , "Match Details Updated!!", JOptionPane.INFORMATION_MESSAGE);
+                        emptyTextFields();
+                        btnAddMatch.setEnabled(true);
+                        tblMatches.clearSelection();
+                        return;
                     }
-                    JOptionPane.showMessageDialog(pnlMain, "Match No. does not exist in table!", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(pnlMain, "Invalid Match No. (1-32)", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
                 }
+                JOptionPane.showMessageDialog(pnlMain, "Match No. does not exist in table!", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(pnlMain, "Empty Fields Detected!", "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(pnlMain, "Invalid Match No (1-32)!", "Match No limit exceeded !!", JOptionPane.ERROR_MESSAGE);
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(pnlMain, "Invalid Match No: " + e, "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
         }
-    }//GEN-LAST:event_btnUpdateMatchStatusActionPerformed
+    }//GEN-LAST:event_btnUpdateMatchActionPerformed
 
     private void lblMenuHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuHomeMouseClicked
         // TODO add your handling code here:
-        
-        cardLayout.show(pnlMainBody, "Home");
+        setActive(lblMenuHome);
+        bodyLayout.show(pnlMainBody, "Home");
     }//GEN-LAST:event_lblMenuHomeMouseClicked
 
-    private void lblMenuAdminMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuAdminMouseClicked
+    private void lblMenuAddMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuAddMatchesMouseClicked
         // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Admin");
-    }//GEN-LAST:event_lblMenuAdminMouseClicked
+        setActive(lblMenuAddMatches);
+        if("Admin".equals(user)){
+            bodyLayout.show(pnlMainBody, "Add Matches");
+        } else {
+            bodyLayout.show(pnlMainBody, "Not Admin");
+        }
+    }//GEN-LAST:event_lblMenuAddMatchesMouseClicked
 
     private void lblMenuMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuMatchesMouseClicked
         // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Matches");
+        setActive(lblMenuMatches);
+        bodyLayout.show(pnlMainBody, "Matches");
     }//GEN-LAST:event_lblMenuMatchesMouseClicked
 
     private void txtFldTicketOwnerNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldTicketOwnerNameActionPerformed
@@ -2110,14 +1974,17 @@ public class NPLTicket extends javax.swing.JFrame {
     private void btnRemoveTicketActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveTicketActionPerformed
         // TODO add your handling code here:
         try {
-            if(!"".equals(txtFldRemoveTicketID.getText())) {
-                String ticketID = txtFldRemoveTicketID.getText();
+            if(!"".equals(txtFldTicketID.getText())) {
+                String ticketID = txtFldTicketID.getText();
                 for(TicketModel ticket: ticketList) {
                     if(ticket.getTicketId().equals(ticketID)) {
                         ticketList.remove(ticketList.indexOf(ticket));
                         loadDataToTicketTable();
                         JOptionPane.showMessageDialog(pnlMain, "Ticket Details of " + ticketID +" removed successfully!", "Ticket Details Removed !!", JOptionPane.INFORMATION_MESSAGE);
-                        txtFldRemoveTicketID.setText("");
+                        emptyTextFields();
+                        addDashboardData();
+                        btnAddTicket.setEnabled(true);
+                        tblTicketDetails.clearSelection();
                         return;
                     } 
                 }
@@ -2144,17 +2011,13 @@ public class NPLTicket extends javax.swing.JFrame {
                             }
                         }
                         if(a != 0) {
-                            String ticketId = ticketList.isEmpty()? "Zone" + cbTicketZone.getSelectedItem() + "_1": "Zone" + cbTicketZone.getSelectedItem() + "_" + String.valueOf(ticketList.indexOf(ticketList.get(ticketList.size() - 1)) + 1);
-                            String systemDate =  LocalDate.now() + "";
-                            TicketModel ticket = new TicketModel(ticketId, Integer.parseInt(txtFldTicketMatchNo.getText()), txtFldTicketOwnerName.getText(), txtFldTicketOwnerPhone.getText(), txtFldTicketOwnerEmail.getText(), cbTicketZone.getSelectedItem().toString(), systemDate);
+                            String ticketId = ticketList.isEmpty()? "Zone" + cbTicketZone.getSelectedItem() + "_1": "Zone" + cbTicketZone.getSelectedItem() + "_" + (ticketList.size() + 1);
+                            LocalDate systemDate =  LocalDate.now();
+                            TicketModel ticket = new TicketModel(ticketId, Integer.parseInt(txtFldTicketMatchNo.getText()), txtFldTicketOwnerName.getText(), txtFldTicketOwnerPhone.getText(), txtFldTicketOwnerEmail.getText(), cbTicketZone.getSelectedItem().toString(), systemDate, cbTicketPaymentMethod.getSelectedItem().toString());
                             addTicket(ticket);
                             JOptionPane.showMessageDialog(pnlMain,"(" +  ticketId + "," + txtFldTicketMatchNo.getText() + "," + txtFldTicketOwnerPhone.getText() + ",\n" + txtFldTicketOwnerEmail.getText() + "," + cbTicketZone.getSelectedItem().toString() + ")", "Ticket Added!!", JOptionPane.INFORMATION_MESSAGE);
-                            txtFldTicketMatchNo.setText("");
-                            txtFldTicketOwnerName.setText("");
-                            txtFldTicketOwnerPhone.setText("");
-                            txtFldTicketOwnerEmail.setText("");
-                            cbTicketZone.setSelectedIndex(0);
-                            return;
+                            emptyTextFields();
+                            addDashboardData();
                         } else {
                             JOptionPane.showMessageDialog(pnlMain, "Match No doesn't exist!" , "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
                         }
@@ -2182,29 +2045,640 @@ public class NPLTicket extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFldTicketOwnerEmailActionPerformed
 
-    private void btnManageMatchDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageMatchDetailsActionPerformed
-        // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Admin");
-    }//GEN-LAST:event_btnManageMatchDetailsActionPerformed
-
-    private void btnManageTicketDetailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageTicketDetailsActionPerformed
-        // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Admin");
-    }//GEN-LAST:event_btnManageTicketDetailsActionPerformed
-
     private void lblMenuDashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuDashboardMouseClicked
         // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Dashboard");
+        setActive(lblMenuDashboard);
+        bodyLayout.show(pnlMainBody, "Dashboard");
     }//GEN-LAST:event_lblMenuDashboardMouseClicked
 
     private void txtFldTicketMatchNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldTicketMatchNoActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFldTicketMatchNoActionPerformed
 
-    private void btnHomeToMatchesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeToMatchesActionPerformed
+    private void lblLogInToHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLogInToHomeMouseClicked
         // TODO add your handling code here:
-        cardLayout.show(pnlMainBody, "Matches");
-    }//GEN-LAST:event_btnHomeToMatchesActionPerformed
+        setActive(lblMenuHome);
+        menuLayout.show(pnlMenu, "User Menu");
+        topLayout.show(getContentPane(), "Main");
+        bodyLayout.show(pnlMainBody, "Home");
+    }//GEN-LAST:event_lblLogInToHomeMouseClicked
+
+    private void lblLogInToMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLogInToMatchesMouseClicked
+        // TODO add your handling code here:
+        setActive(lblMenuMatches);
+        menuLayout.show(pnlMenu, "User Menu");
+        topLayout.show(getContentPane(), "Main");
+        bodyLayout.show(pnlMainBody, "Matches");
+    }//GEN-LAST:event_lblLogInToMatchesMouseClicked
+
+    private void pnlAdminMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pnlAdminMenuMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_pnlAdminMenuMouseClicked
+
+    private void lblMenuTicketMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMenuTicketMouseClicked
+        // TODO add your handling code here:
+        setActive(lblMenuTicket);
+        topLayout.show(getContentPane(), "Main");
+        bodyLayout.show(pnlMainBody, "Tickets");
+    }//GEN-LAST:event_lblMenuTicketMouseClicked
+
+    private void lblLogInToTicketsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLogInToTicketsMouseClicked
+        // TODO add your handling code here:
+        setActive(lblMenuTicket);
+        topLayout.show(getContentPane(), "Main");
+        bodyLayout.show(pnlMainBody, "Tickets");
+    }//GEN-LAST:event_lblLogInToTicketsMouseClicked
+
+    private void cbSortMatchTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSortMatchTableActionPerformed
+        // TODO add your handling code here:
+        SelectionSort selectionSort = new SelectionSort();
+        InsertionSort insertionSort = new InsertionSort();
+        MergeSort mergeSort = new MergeSort();
+        switch(cbSortMatchTable.getSelectedIndex()){
+            case 0 -> {
+                selectionSort.sortByMatchNo(matchList, true);
+            }
+            case 1 -> insertionSort.sortBySeats(matchList, false);
+            case 2 -> mergeSort.sortByMatchDate(matchList, false);
+            default -> {
+                addMatchData();
+            }
+                
+        }
+        loadDataToMatchTable();
+    }//GEN-LAST:event_cbSortMatchTableActionPerformed
+
+    private void cbSortTicketTableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbSortTicketTableActionPerformed
+        SelectionSort selectionSort = new SelectionSort();
+        InsertionSort insertionSort = new InsertionSort();
+        MergeSort mergeSort = new MergeSort();
+        switch(cbSortTicketTable.getSelectedIndex()) {
+            case 0 -> {
+                selectionSort.sortByBookingDate(ticketList, true);
+            }
+            case 1 -> insertionSort.sortByTicketOwnerName(ticketList, true);
+            case 2 -> mergeSort.sortByZone(ticketList, false);
+            default -> addTicketData();
+        }
+        loadDataToTicketTable();
+    }//GEN-LAST:event_cbSortTicketTableActionPerformed
+
+    private void txtFldMatchesSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldMatchesSearchActionPerformed
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_txtFldMatchesSearchActionPerformed
+
+    private void txtFldMatchesSearchKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFldMatchesSearchKeyTyped
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_txtFldMatchesSearchKeyTyped
+
+    private void txtFldMatchesSearchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFldMatchesSearchKeyReleased
+        // TODO add your handling code here:
+        addMatchCardData();
+    }//GEN-LAST:event_txtFldMatchesSearchKeyReleased
+
+    private void lblMatchSearchIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblMatchSearchIconMouseClicked
+        // TODO add your handling code here:
+        if("".equals(txtFldSearchMatch.getText())) {
+            loadDataToMatchTable();
+        } else {
+            addMatchSearchData();
+        }
+    }//GEN-LAST:event_lblMatchSearchIconMouseClicked
+
+    private void txtFldSearchMatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldSearchMatchActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldSearchMatchActionPerformed
+
+    private void txtFldSearchMatchKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFldSearchMatchKeyReleased
+        // TODO add your handling code here:
+        if("".equals(txtFldSearchMatch.getText())) {
+            loadDataToMatchTable();
+        } else {
+            addMatchSearchData();
+        }
+        
+    }//GEN-LAST:event_txtFldSearchMatchKeyReleased
+
+    private void txtFldSearchTicketOwnerKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFldSearchTicketOwnerKeyReleased
+        // TODO add your handling code here:
+        if("".equals(txtFldSearchTicketOwner.getText())) {
+            loadDataToTicketTable();
+        } else {
+            addTicketSearchData();
+        }
+    }//GEN-LAST:event_txtFldSearchTicketOwnerKeyReleased
+
+    private void lblSearchTicketIconMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblSearchTicketIconMouseClicked
+        // TODO add your handling code here:
+        if("".equals(txtFldSearchTicketOwner.getText())) {
+            loadDataToTicketTable();
+        } else {
+            addTicketSearchData();
+        }
+    }//GEN-LAST:event_lblSearchTicketIconMouseClicked
+
+    private void pnlMatchTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pnlMatchTableMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_pnlMatchTableMouseClicked
+
+    private void txtFldMatchStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldMatchStatusActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldMatchStatusActionPerformed
+
+    private void tblMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblMatchesMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = tblMatches.getSelectedRow();
+        MatchModel match = matchList.get(selectedRow);
+        txtFldMatchNo.setText(String.valueOf(match.getMatchNo()));
+        txtFldMatchTeams.setText(match.getTeams());
+        txtFldMatchDate.setText(String.valueOf(match.getMatchDate()));
+        txtFldMatchTime.setText(String.valueOf(match.getMatchTime()));
+        if(!"tbd".equals(match.getMatchStatus().toLowerCase())) {
+            txtFldMatchStatus.setText(match.getMatchStatus());
+        } else {
+            txtFldMatchStatus.setText("");
+        }
+        btnAddMatch.setEnabled(false);
+    }//GEN-LAST:event_tblMatchesMouseClicked
+
+    private Boolean rememberUser = false;
+    
+    private void ckbRememberMeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ckbRememberMeActionPerformed
+        // TODO add your handling code here:
+        rememberUser = ckbRememberMe.isSelected();
+    }//GEN-LAST:event_ckbRememberMeActionPerformed
+
+    private void btnDeleteMatchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteMatchActionPerformed
+        // TODO add your handling code here:
+        try {
+            
+            String matchNoText = txtFldMatchNo.getText();
+
+            if (matchNoText.isEmpty()) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchNo.requestFocus();
+                return;
+            
+            }
+            int matchNo;
+            
+            try {
+                matchNo = Integer.parseInt(txtFldMatchNo.getText());
+                if (matchNo < 1 || matchNo > 32) {
+                    JOptionPane.showMessageDialog(pnlMain, "Match No must be between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldMatchNo.requestFocus();
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No must be a valid number between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchNo.requestFocus();
+                return;
+            }
+
+            for (MatchModel match : matchList) {
+                if (match.getMatchNo() == matchNo) {
+                    int response = JOptionPane.showConfirmDialog(pnlMain, 
+                            "Are you sure you want to delete details for Match no: " + matchNo, 
+                            "Delete Match Details?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    if (response == JOptionPane.YES_OPTION) {
+                        matchList.remove(match);
+                        loadDataToMatchTable();
+                        loadDataToTicketMatchTable();
+                        emptyTextFields();
+                        btnAddMatch.setEnabled(true);
+                        tblMatches.clearSelection();
+                        addDashboardData();
+                        return;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_btnDeleteMatchActionPerformed
+
+    private void txtFldTicketBookingDateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldTicketBookingDateActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldTicketBookingDateActionPerformed
+
+    private void btnUpdateTicketActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateTicketActionPerformed
+        // TODO add your handling code here:
+        if(isInputTicketValid()) {
+            for(TicketModel ticket: ticketList) {
+                if(ticket.getTicketId().equals(txtFldTicketID.getText())) {
+                    ticket.setTicketId(txtFldTicketID.getText());
+                    ticket.setMatchNo(Integer.parseInt(txtFldTicketMatchNo.getText()));
+                    ticket.setTicketOwnerName(txtFldTicketOwnerName.getText());
+                    ticket.setTicketOwnerPhone(txtFldTicketOwnerPhone.getText());
+                    ticket.setTicketOwnerEmail(txtFldTicketOwnerEmail.getText());
+                    ticket.setTicketZone(cbTicketZone.getSelectedItem().toString());
+                    ticket.setBookingDate(LocalDate.parse(txtFldTicketBookingDate.getText()));
+                    ticket.setPaymentMethod(cbTicketPaymentMethod.getSelectedItem().toString());
+                    loadDataToTicketTable();
+                    addDashboardData();
+                    JOptionPane.showMessageDialog(pnlMain,"Ticket Details Updated for  " + txtFldTicketOwnerName.getText() , "Ticket Details Updated!!", JOptionPane.INFORMATION_MESSAGE);
+                    emptyTextFields();
+                    btnAddTicket.setEnabled(true);
+                    tblTicketDetails.clearSelection();
+                    return;
+                }
+            }
+        }
+    }//GEN-LAST:event_btnUpdateTicketActionPerformed
+
+    private void tblTicketDetailsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTicketDetailsMouseClicked
+        // TODO add your handling code here:
+        int selectedRow = tblTicketDetails.getSelectedRow();
+        TicketModel ticket = ticketList.get(selectedRow);
+        txtFldTicketID.setText(ticket.getTicketId());
+        txtFldTicketMatchNo.setText(String.valueOf(ticket.getMatchNo()));
+        txtFldTicketOwnerName.setText(ticket.getTicketOwnerName());
+        txtFldTicketOwnerPhone.setText(ticket.getTicketOwnerPhone());
+        txtFldTicketOwnerEmail.setText(ticket.getTicketOwnerEmail());
+        cbTicketZone.setSelectedItem(ticket.getTicketZone());
+        txtFldTicketBookingDate.setText(String.valueOf(ticket.getBookingDate()));
+        cbTicketPaymentMethod.setSelectedItem(ticket.getPaymentMethod());
+        btnAddTicket.setEnabled(false);
+    }//GEN-LAST:event_tblTicketDetailsMouseClicked
+
+    private void lblLogoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblLogoMouseClicked
+        // TODO add your handling code here:
+        setActive(lblMenuHome);
+        bodyLayout.show(pnlMainBody, "Home");
+    }//GEN-LAST:event_lblLogoMouseClicked
+
+    private void lblUserMenuHomeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUserMenuHomeMouseClicked
+        // TODO add your handling code here:
+        setActive(lblUserMenuHome);
+        bodyLayout.show(pnlMainBody, "Home");
+    }//GEN-LAST:event_lblUserMenuHomeMouseClicked
+
+    private void lblUserMenuMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUserMenuMatchesMouseClicked
+        // TODO add your handling code here:
+        setActive(lblUserMenuMatches);
+        bodyLayout.show(pnlMainBody, "Matches");
+    }//GEN-LAST:event_lblUserMenuMatchesMouseClicked
+
+    private void lblUserMenuTicketMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUserMenuTicketMouseClicked
+        // TODO add your handling code here:
+        setActive(lblUserMenuTicket);
+        bodyLayout.show(pnlMainBody, "Buy Tickets");
+    }//GEN-LAST:event_lblUserMenuTicketMouseClicked
+
+    private void lblUserMenuLogoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblUserMenuLogoMouseClicked
+        // TODO add your handling code here:
+        lblLogoMouseClicked(evt);
+    }//GEN-LAST:event_lblUserMenuLogoMouseClicked
+
+    private void btnUserMenuLogInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUserMenuLogInActionPerformed
+        // TODO add your handling code here:
+        btnHomeLogInActionPerformed(evt);
+    }//GEN-LAST:event_btnUserMenuLogInActionPerformed
+
+    private void pnlUserMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pnlUserMenuMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pnlUserMenuMouseClicked
+
+    private void txtFldBuyTicketOwnerNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldBuyTicketOwnerNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldBuyTicketOwnerNameActionPerformed
+
+    private void txtFldBuyTicketOwnerPhoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldBuyTicketOwnerPhoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldBuyTicketOwnerPhoneActionPerformed
+
+    private void txtFldBuyTicketOwnerEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldBuyTicketOwnerEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtFldBuyTicketOwnerEmailActionPerformed
+
+    private void cbBuyTicketZoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbBuyTicketZoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbBuyTicketZoneActionPerformed
+
+    private void cbBuyTicketMatchesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbBuyTicketMatchesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbBuyTicketMatchesActionPerformed
+
+    private void btnBuyTicketActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuyTicketActionPerformed
+        // TODO add your handling code here:
+        if (isInputBuyTicketValid()) {
+            String match = cbBuyTicketMatches.getSelectedItem().toString();
+            String ownerName = txtFldBuyTicketOwnerName.getText();
+            String paymentMethod = cbBuyTicketPaymentMethod.getSelectedItem().toString();
+            String ownerPhone = txtFldBuyTicketOwnerPhone.getText();
+
+            String ticketId = ticketList.get(ticketList.size() - 1).getTicketId();
+            int indexOfZone = ticketId.indexOf("_");
+            ticketId = ticketId.substring(0, indexOfZone) + String.valueOf(ticketList.size() + 1);
+            LocalDate systemDate =  LocalDate.now();
+            int matchNo = -1;
+            for(MatchModel matchObj: matchList) {
+                if(cbBuyTicketMatches.getSelectedItem().toString().equals(matchObj.getTeams())) {
+                    matchNo = matchObj.getMatchNo();
+                }
+            }
+            TicketModel ticket = new TicketModel(ticketId, matchNo, txtFldBuyTicketOwnerName.getText(), txtFldBuyTicketOwnerPhone.getText(), txtFldBuyTicketOwnerEmail.getText(), cbBuyTicketZone.getSelectedItem().toString(), systemDate, cbBuyTicketPaymentMethod.getSelectedItem().toString());
+            addTicket(ticket);
+
+            JOptionPane.showMessageDialog(pnlMain, 
+                "Ticket successfully purchased!\n" +
+                "Match :" + match + "\n" +
+                "Name: " + ownerName + "\n" +
+                "Phone: " + ownerPhone + "\n" +
+                "Payment Method: " + paymentMethod, 
+                "Success", 
+                JOptionPane.INFORMATION_MESSAGE);
+
+            emptyTextFields();
+        }
+    }//GEN-LAST:event_btnBuyTicketActionPerformed
+
+    private void tblTicketMatchesMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTicketMatchesMouseClicked
+        // TODO add your handling code here:
+        DefaultTableModel tblTicketMatchesModel = (DefaultTableModel) tblTicketMatches.getModel();
+        int selectedRow = tblTicketMatches.getSelectedRow();
+        cbBuyTicketMatches.setSelectedItem(tblTicketMatchesModel.getValueAt(selectedRow, 1));
+    }//GEN-LAST:event_tblTicketMatchesMouseClicked
+
+    private void cbBuyTicketPaymentMethodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbBuyTicketPaymentMethodActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbBuyTicketPaymentMethodActionPerformed
+
+    private void cbTicketPaymentMethodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbTicketPaymentMethodActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbTicketPaymentMethodActionPerformed
+
+    private void pnlManageMatchDetailsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pnlManageMatchDetailsMouseClicked
+        // TODO add your handling code here:
+        tblMatches.clearSelection();
+        btnAddMatch.setEnabled(true);
+    }//GEN-LAST:event_pnlManageMatchDetailsMouseClicked
+
+    private void pnlManageTicketsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pnlManageTicketsMouseClicked
+        // TODO add your handling code here:
+        tblTicketDetails.clearSelection();
+        btnAddTicket.setEnabled(true);
+    }//GEN-LAST:event_pnlManageTicketsMouseClicked
+    
+    private void emptyTextFields() {
+        txtFldMatchNo.setText("");
+        txtFldMatchTeams.setText("");
+        txtFldMatchDate.setText("");
+        txtFldMatchTime.setText("");
+        txtFldMatchStatus.setText("");
+        txtFldTicketMatchNo.setText("");
+        txtFldTicketOwnerName.setText("");
+        txtFldTicketOwnerPhone.setText("");
+        txtFldTicketOwnerEmail.setText("");
+        cbTicketZone.setSelectedIndex(0);
+        txtFldTicketID.setText("");
+        txtFldTicketBookingDate.setText("");
+        cbTicketPaymentMethod.setSelectedIndex(0);
+        pswFldLogInPassword.setText("");
+        if(!rememberUser) {
+            txtFldLogInUsername.setText("");
+        }
+        txtFldBuyTicketOwnerName.setText("");
+        txtFldBuyTicketOwnerPhone.setText("");
+        txtFldBuyTicketOwnerEmail.setText("");
+        cbBuyTicketMatches.setSelectedIndex(0);
+        cbBuyTicketZone.setSelectedIndex(0);
+        cbBuyTicketPaymentMethod.setSelectedIndex(0);
+        txtFldSearchMatch.setText("");
+        txtFldSearchTicketOwner.setText("");
+        txtFldMatchesSearch.setText("");
+        addMatchCardData();
+    }
+    
+    private Boolean isInputMatchValid() {
+        try {
+            String matchNoText = txtFldMatchNo.getText();
+
+            if (matchNoText.isEmpty()) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchNo.requestFocus();
+                return false;
+            
+            }
+            
+            try {
+                int matchNo = Integer.parseInt(txtFldMatchNo.getText());
+                if (matchNo < 1 || matchNo > 32) {
+                    JOptionPane.showMessageDialog(pnlMain, "Match No must be between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldMatchNo.requestFocus();
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No must be a number between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchNo.requestFocus();
+                return false;
+            }
+            
+            if ("".equals(txtFldMatchTeams.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Match Teams field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchTeams.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldMatchDate.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Match Date field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchDate.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldMatchTime.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Match Time field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchTime.requestFocus();
+                return false;
+            }
+
+            try {
+                LocalDate parsedDate = LocalDate.parse(txtFldMatchDate.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Invalid Date format. Please use (yyyy-mm-dd).", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchDate.requestFocus();
+                return false;
+            }
+
+            try {
+                LocalTime parsedTime = LocalTime.parse(txtFldMatchTime.getText());
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Invalid Time format. Please use (hh:mm).", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchTime.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldMatchNo.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldMatchNo.requestFocus();
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+    }
+    
+    private Boolean isInputTicketValid() {
+        try {
+            if ("".equals(txtFldTicketMatchNo.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldTicketMatchNo.requestFocus();
+                return false;
+            }
+
+            try {
+                int matchNo = Integer.parseInt(txtFldTicketMatchNo.getText());
+                if (matchNo < 1 || matchNo > 32) {
+                    JOptionPane.showMessageDialog(pnlMain, "Match No must be between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldTicketMatchNo.requestFocus();
+                    return false;
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(pnlMain, "Match No must be a number between 1 and 32.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldTicketMatchNo.requestFocus();
+                return false;
+            }
+
+            if ("--Select--".equals(cbTicketZone.getSelectedItem())) {
+                JOptionPane.showMessageDialog(pnlMain, "Please select a Zone.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                cbTicketZone.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldTicketOwnerName.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Name field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldTicketOwnerName.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldTicketOwnerPhone.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Phone field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldTicketOwnerPhone.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldTicketOwnerEmail.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Email field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldTicketOwnerEmail.requestFocus();
+                return false;
+            }
+
+            try {
+                String phonePattern = "^[0-9]{10}$";
+                if (!txtFldTicketOwnerPhone.getText().matches(phonePattern)) {
+                    JOptionPane.showMessageDialog(pnlMain, "Invalid Phone Number. Please enter a 10-digit phone number.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldTicketOwnerPhone.requestFocus();
+                    return false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Unexpected error in phone validation: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+
+            try {
+                String emailPattern = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+                if (!txtFldTicketOwnerEmail.getText().matches(emailPattern)) {
+                    JOptionPane.showMessageDialog(pnlMain, "Invalid Email format.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldTicketOwnerEmail.requestFocus();
+                    return false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Unexpected error in email validation: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+
+            if ("--Select--".equals(cbTicketPaymentMethod.getSelectedItem())) {
+                JOptionPane.showMessageDialog(pnlMain, "Please select a Payment Method.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                cbTicketPaymentMethod.requestFocus();
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+    }
+    
+    private Boolean isInputBuyTicketValid() {
+        try {
+            if ("".equals(txtFldBuyTicketOwnerName.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Name field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldBuyTicketOwnerName.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldBuyTicketOwnerPhone.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Phone field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldBuyTicketOwnerPhone.requestFocus();
+                return false;
+            }
+
+            if ("".equals(txtFldBuyTicketOwnerEmail.getText())) {
+                JOptionPane.showMessageDialog(pnlMain, "Owner Email field cannot be empty.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                txtFldBuyTicketOwnerEmail.requestFocus();
+                return false;
+            }
+
+            try {
+                String phonePattern = "^[0-9]{10}$";
+                if (!txtFldBuyTicketOwnerPhone.getText().matches(phonePattern)) {
+                    JOptionPane.showMessageDialog(pnlMain, "Invalid Phone Number. Please enter a 10-digit phone number.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldBuyTicketOwnerPhone.requestFocus();
+                    return false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Unexpected error in phone validation: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+
+            try {
+                String emailPattern = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+                if (!txtFldBuyTicketOwnerEmail.getText().matches(emailPattern)) {
+                    JOptionPane.showMessageDialog(pnlMain, "Invalid Email format.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                    txtFldBuyTicketOwnerEmail.requestFocus();
+                    return false;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(pnlMain, "Unexpected error in email validation: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+            
+            if (cbBuyTicketMatches.getSelectedIndex() == 0) {
+                JOptionPane.showMessageDialog(pnlMain, "Please select a Match.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                cbBuyTicketMatches.requestFocus();
+                return false;
+            }
+
+            if (cbBuyTicketZone.getSelectedIndex() == 0) {
+                JOptionPane.showMessageDialog(pnlMain, "Please select a Zone.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                cbBuyTicketZone.requestFocus();
+                return false;
+            }
+
+            if (cbBuyTicketPaymentMethod.getSelectedIndex() == 0) {
+                JOptionPane.showMessageDialog(pnlMain, "Please select a Payment Method for ticket purchase.", "Invalid Inputs !!", JOptionPane.ERROR_MESSAGE);
+                cbBuyTicketPaymentMethod.requestFocus();
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(pnlMain, "Unexpected Error: " + e.getMessage(), "Invalid Inputs !!", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+    }
     
     private void addMatch(MatchModel match) 
     {
@@ -2224,7 +2698,7 @@ public class NPLTicket extends javax.swing.JFrame {
         matchTableModel.setRowCount(0);
         for(MatchModel match: matchList) {
             matchTableModel.addRow(new Object[] {
-                match.getMatchNo(), match.getTeams(), match.getMatchDate(), match.getMatchTime(), match.getMatchStatus()
+                match.getMatchNo(), match.getTeams(), match.getMatchDate(), match.getMatchTime(), match.getMatchStatus(), match.getMatchSeats()
             });
         }
     }
@@ -2235,7 +2709,17 @@ public class NPLTicket extends javax.swing.JFrame {
         ticketTableModel.setRowCount(0);
         for(TicketModel ticket: ticketList) {
             ticketTableModel.addRow(new Object[] {
-                ticket.getTicketId(), ticket.getMatchNo(), ticket.getTicketOwnerName(), ticket.getTicketOwnerPhone(), ticket.getTicketOwnerEmail(),ticket.getTicketZone(), ticket.getBookingDate()
+                ticket.getTicketId(), ticket.getMatchNo(), ticket.getTicketOwnerName(), ticket.getTicketOwnerPhone(), ticket.getTicketOwnerEmail(),ticket.getTicketZone(), ticket.getBookingDate(), ticket.getPaymentMethod()
+            });
+        }
+    }
+    
+    private void loadDataToTicketMatchTable() {
+        ticketMatchesTableModel = (DefaultTableModel) tblTicketMatches.getModel();
+        ticketMatchesTableModel.setRowCount(0);
+        for(TicketMatchModel match: ticketMatchList){
+            ticketMatchesTableModel.addRow(new Object[] {
+                match.getMatchNo(), match.getTeams(), match.getMatchDate(), match.getMatchTime()
             });
         }
     }
@@ -2252,14 +2736,14 @@ public class NPLTicket extends javax.swing.JFrame {
     {
         ticketTableModel = (DefaultTableModel) tblTicketDetails.getModel();
         ticketTableModel.addRow(new Object[] {
-            ticket.getTicketId(), ticket.getMatchNo(), ticket.getTicketOwnerName(), ticket.getTicketOwnerPhone(), ticket.getTicketOwnerEmail(),ticket.getTicketZone(), ticket.getBookingDate()
+            ticket.getTicketId(), ticket.getMatchNo(), ticket.getTicketOwnerName(), ticket.getTicketOwnerPhone(), ticket.getTicketOwnerEmail(),ticket.getTicketZone(), ticket.getBookingDate(), ticket.getPaymentMethod()
         });
     }
     
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
@@ -2303,6 +2787,8 @@ public class NPLTicket extends javax.swing.JFrame {
     private javax.swing.JButton btnRemoveTicket;
     private javax.swing.JButton btnUpdateMatchStatus;
     private javax.swing.JComboBox<String> cbTicketZone;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JLabel lblAddMatch;
@@ -2321,6 +2807,7 @@ public class NPLTicket extends javax.swing.JFrame {
     private javax.swing.JLabel lblMatchDate1;
     private javax.swing.JLabel lblMatchDetailsTable;
     private javax.swing.JLabel lblMatchTeams;
+    private javax.swing.JLabel lblMatchesPageHeader;
     private javax.swing.JLabel lblMenuAdmin;
     private javax.swing.JLabel lblMenuContactUs;
     private javax.swing.JLabel lblMenuDashboard;
@@ -2359,40 +2846,9 @@ public class NPLTicket extends javax.swing.JFrame {
     private javax.swing.JPanel pnlMainMenu;
     private javax.swing.JPanel pnlManageMatch;
     private javax.swing.JPanel pnlManageTicketDetails;
-    private javax.swing.JPanel pnlMatchCard1;
-    private javax.swing.JPanel pnlMatchCard10;
-    private javax.swing.JPanel pnlMatchCard11;
-    private javax.swing.JPanel pnlMatchCard12;
-    private javax.swing.JPanel pnlMatchCard13;
-    private javax.swing.JPanel pnlMatchCard14;
-    private javax.swing.JPanel pnlMatchCard15;
-    private javax.swing.JPanel pnlMatchCard16;
-    private javax.swing.JPanel pnlMatchCard17;
-    private javax.swing.JPanel pnlMatchCard18;
-    private javax.swing.JPanel pnlMatchCard19;
-    private javax.swing.JPanel pnlMatchCard2;
-    private javax.swing.JPanel pnlMatchCard20;
-    private javax.swing.JPanel pnlMatchCard21;
-    private javax.swing.JPanel pnlMatchCard22;
-    private javax.swing.JPanel pnlMatchCard23;
-    private javax.swing.JPanel pnlMatchCard24;
-    private javax.swing.JPanel pnlMatchCard25;
-    private javax.swing.JPanel pnlMatchCard26;
-    private javax.swing.JPanel pnlMatchCard27;
-    private javax.swing.JPanel pnlMatchCard28;
-    private javax.swing.JPanel pnlMatchCard29;
-    private javax.swing.JPanel pnlMatchCard3;
-    private javax.swing.JPanel pnlMatchCard30;
-    private javax.swing.JPanel pnlMatchCard31;
-    private javax.swing.JPanel pnlMatchCard32;
-    private javax.swing.JPanel pnlMatchCard4;
-    private javax.swing.JPanel pnlMatchCard5;
-    private javax.swing.JPanel pnlMatchCard6;
-    private javax.swing.JPanel pnlMatchCard7;
-    private javax.swing.JPanel pnlMatchCard8;
-    private javax.swing.JPanel pnlMatchCard9;
     private javax.swing.JPanel pnlMatchDetailsForm;
     private javax.swing.JPanel pnlMatches;
+    private javax.swing.JPanel pnlMatchesPage;
     private javax.swing.JPanel pnlMidPitch;
     private javax.swing.JPanel pnlPitch;
     private javax.swing.JPanel pnlRemoveTicket;
